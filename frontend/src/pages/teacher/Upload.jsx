@@ -93,7 +93,7 @@ const TeacherUpload = () => {
     setDuration(30);
   } catch (err) {
     console.error(err);
-    alert('Publishing failed.');
+    alert(err?.response?.data?.error || 'Publishing failed.');
   }
 };
 

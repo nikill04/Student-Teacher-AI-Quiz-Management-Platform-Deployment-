@@ -208,12 +208,14 @@ export const publishQuiz = async (req, res) => {
     }
 
     // STEP 2: CREATE NEW QUIZ IN DATABASE
+    // STEP 2: CREATE NEW QUIZ IN DATABASE
     const newQuiz = await Quiz.create({
       title: quizData.title,
       batch: batchId,
       createdBy: req.user.userId,  // From JWT token
       source: quizData.source || 'ai',  // 'ai' or 'manual'
-      deadline: quizData.deadline,
+      // Convert empty string to undefined so Mongoose doesn't try to cast "" to Date
+      deadline: quizData.deadline ? new Date(quizData.deadline) : undefined,
       duration: quizData.duration || 30,
       questions: quizData.questions.map(q => ({
         question: q.question,
@@ -248,7 +250,7 @@ export const publishQuiz = async (req, res) => {
 
   } catch (err) {
     console.error('Publish quiz error:', err.message);
-    res.status(500).json({ error: 'Failed to publish quiz' });
+    res.status(500).json({ error: 'Failed to publish quiz', details: err.message });
   }
 };
 
