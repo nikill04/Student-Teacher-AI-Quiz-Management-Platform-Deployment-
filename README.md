@@ -1,3 +1,3 @@
 swagger
 
-https://quizapp-backend-frj2.onrender.com/api-docs/
+https://student-teacher-ai-quiz-management.onrender.com/api-docs
