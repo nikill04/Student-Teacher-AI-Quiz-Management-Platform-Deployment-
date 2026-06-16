@@ -10,8 +10,13 @@ authRouter.post('/register', register);
 authRouter.post('/logout', logout);
 
 // routes/authRoutes.js
+// authRouter.get('/check', verifyToken, (req, res) => {
+//   res.status(200).json({ valid: true });
+// });
+
 authRouter.get('/check', verifyToken, (req, res) => {
-  res.status(200).json({ valid: true });
+  // Return success:true (matches AuthContext check) + role for frontend routing
+  res.status(200).json({ success: true, role: req.user.role });
 });
 
 
