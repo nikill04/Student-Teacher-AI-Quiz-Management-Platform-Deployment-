@@ -6,11 +6,12 @@
  * user = null                         -> not logged in
  * user = { name, role: 'teacher' }    -> logged in
  *
- * The real login token lives in an http-only cookie (the browser handles it).
- * On page load we ask the backend "/auth/check" whether that cookie is still valid.
+ * The login token lives in an http-only cookie (the browser handles it) and also in
+ * localStorage (see api/axios.js) for browsers that block the cookie.
+ * On page load we ask the backend "/auth/check" whether the login is still valid.
  */
 import { createContext, useContext, useState, useEffect } from 'react';
-import axios from '../api/axios';
+import axios, { clearToken } from '../api/axios';
 
 const AuthContext = createContext();
 
@@ -25,7 +26,10 @@ export const AuthProvider = ({ children }) => {
     axios
       .get('/auth/check')
       .then((res) => setUser({ name: res.data.name, role: res.data.role }))
-      .catch(() => setUser(null))
+      .catch((err) => {
+        if (err.response?.status === 401) clearToken(); // saved token expired
+        setUser(null);
+      })
       .finally(() => {
         clearTimeout(timer);
         setLoading(false);
@@ -42,6 +46,7 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error('Logout failed', err);
     }
+    clearToken();
     setUser(null);
   };
 

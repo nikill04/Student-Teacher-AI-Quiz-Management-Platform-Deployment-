@@ -4,6 +4,9 @@
  *
  * - baseURL: the backend address (set VITE_API_URL in frontend/.env for production)
  * - withCredentials: true -> the browser sends the login cookie with every request
+ * - the login token is ALSO kept in localStorage and sent in the "Authorization" header,
+ *   because some browsers (Safari, iPhone, Brave, Incognito) block the cookie when the
+ *   frontend and backend are on different websites.
  */
 import axios from 'axios';
 
@@ -21,6 +24,23 @@ const instance = axios.create({
   withCredentials: true,
 });
 
+// Save / remove the login token (wrapped in try/catch: storage can be blocked in some browsers)
+export const saveToken = (token) => {
+  try { localStorage.setItem('quizai_token', token); } catch { /* ignore */ }
+};
+export const clearToken = () => {
+  try { localStorage.removeItem('quizai_token'); } catch { /* ignore */ }
+};
+
+// Send the saved token with every request
+instance.interceptors.request.use((config) => {
+  try {
+    const token = localStorage.getItem('quizai_token');
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+  } catch { /* ignore */ }
+  return config;
+});
+
 // If the login session expired (401), go back to the login page.
 // (Skip /auth/ calls: a wrong password on the login page also returns 401.)
 instance.interceptors.response.use(
@@ -28,6 +48,7 @@ instance.interceptors.response.use(
   (error) => {
     const isAuthCall = error.config?.url?.startsWith('/auth/');
     if (error.response?.status === 401 && !isAuthCall && window.location.pathname !== '/login') {
+      clearToken();
       window.location.href = '/login';
     }
     return Promise.reject(error);

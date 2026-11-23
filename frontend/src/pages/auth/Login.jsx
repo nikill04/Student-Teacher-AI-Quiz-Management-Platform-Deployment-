@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
-import axios, { getErrorMessage } from '../../api/axios';
+import axios, { getErrorMessage, saveToken } from '../../api/axios';
 import { useAuth, dashboardPath } from '../../context/AuthContext';
 import { Alert } from '../../components/ui';
 import AuthCard from './AuthCard';
@@ -27,6 +27,7 @@ const Login = () => {
     setLoading(true);
     try {
       const res = await axios.post('/auth/login', formData);
+      saveToken(res.data.token); // used when the browser blocks the login cookie
       login(res.data.user); // remember the user in AuthContext
       navigate(dashboardPath(res.data.user.role));
     } catch (err) {

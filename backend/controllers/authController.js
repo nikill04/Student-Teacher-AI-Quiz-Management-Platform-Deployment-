@@ -43,8 +43,12 @@ export const login = async (req, res) => {
     res.cookie('token', token, { ...cookieOptions(req), maxAge: ONE_DAY });
 
     console.log(`User logged in: ${email}`);
+    // The token is sent in the cookie AND in the response. Some browsers (Safari, iPhone,
+    // Brave, Incognito) block cookies between two different sites, so the frontend also
+    // keeps the token and sends it in the "Authorization" header (see frontend/src/api/axios.js).
     res.json({
       message: 'Login successful',
+      token,
       user: { name: user.name, email: user.email, role: user.role },
     });
   } catch (err) {
