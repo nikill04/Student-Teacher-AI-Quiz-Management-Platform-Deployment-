@@ -1,52 +1,57 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Trophy } from 'lucide-react';
 import StudentLayout from '../../components/StudentLayout';
-import axios from '../../api/axios';
+import { Page, PageHeader, Loading, Alert, EmptyState, formatDate } from '../../components/ui';
+import axios, { getErrorMessage } from '../../api/axios';
+
+const scoreBadge = (score) => (score >= 80 ? 'badge-green' : score >= 50 ? 'badge-blue' : 'badge-red');
 
 const StudentMyResults = () => {
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState(null); // null = still loading
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchResults = async () => {
-      try {
-        const res = await axios.get('/student/my-results');
-        setResults(res.data);
-      } catch (err) {
-        console.error("Failed to fetch results:", err);
-      }
-    };
-    fetchResults();
+    axios
+      .get('/student/my-results')
+      .then((res) => setResults(res.data))
+      .catch((err) => {
+        setResults([]);
+        setError(getErrorMessage(err, 'Could not load results'));
+      });
   }, []);
 
   return (
     <StudentLayout>
-      <div className="p-8 max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">My Quiz Results</h1>
+      <Page>
+        <PageHeader title="My Results" subtitle="Every quiz you have submitted." />
+        <Alert message={error} />
 
-        {results.length === 0 ? (
-          <p className="text-gray-500">No quizzes submitted yet.</p>
+        {results === null ? (
+          <Loading />
+        ) : results.length === 0 ? (
+          <EmptyState icon={Trophy} title="No results yet" text="Take a quiz and your score will show up here.">
+            <Link to="/student/active-quizzes" className="btn-primary">See Active Quizzes</Link>
+          </EmptyState>
         ) : (
-          <div className="space-y-4">
-            {results.map((res, i) => (
-              <div key={i} className="border rounded-xl p-5 bg-white shadow-sm">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-800">{res.quizTitle}</h2>
-                    <p className="text-gray-600 text-sm">Score: {res.score}% | Correct: {res.correctAnswers}</p>
-                    <p className="text-gray-600 text-sm">Completed: {new Date(res.completedAt).toLocaleString()}</p>
-                  </div>
-                  <Link
-                    to={`/student/result/${res.quizId}`}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                  >
-                    View Details
-                  </Link>
+          <div className="space-y-3">
+            {results.map((result) => (
+              <div key={result.quizId} className="card flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="font-semibold text-slate-900">{result.quizTitle}</h2>
+                  <p className="text-sm text-slate-500">
+                    {result.correctAnswers} / {result.totalQuestions} correct - {formatDate(result.completedAt, '')} - {result.timeSpent}
+                  </p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className={`${scoreBadge(result.score)} px-3 py-1 text-sm`}>{result.score}%</span>
+                  <Link to={`/student/result/${result.quizId}`} className="btn-secondary">View Details</Link>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </div>
+      </Page>
     </StudentLayout>
   );
 };

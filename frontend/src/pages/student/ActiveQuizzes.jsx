@@ -1,63 +1,41 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Rocket } from 'lucide-react';
 import StudentLayout from '../../components/StudentLayout';
-import axios from '../../api/axios';
-import { Link } from 'react-router-dom';
-import { Clock, BookOpen } from 'lucide-react';
+import QuizCard from '../../components/QuizCard';
+import { Page, PageHeader, Loading, Alert, EmptyState } from '../../components/ui';
+import axios, { getErrorMessage } from '../../api/axios';
 
+// Quizzes the student can still take (not submitted and before the deadline)
 const ActiveQuizzes = () => {
-  const [quizzes, setQuizzes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [quizzes, setQuizzes] = useState(null); // null = still loading
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchActiveQuizzes = async () => {
-      try {
-        const res = await axios.get('/student/active-quizzes');
-        setQuizzes(res.data || []);
-      } catch (err) {
-        console.error('Failed to fetch active quizzes:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchActiveQuizzes();
+    axios
+      .get('/student/active-quizzes')
+      .then((res) => setQuizzes(res.data))
+      .catch((err) => {
+        setQuizzes([]);
+        setError(getErrorMessage(err, 'Could not load active quizzes'));
+      });
   }, []);
 
   return (
     <StudentLayout>
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">Active Quizzes</h1>
+      <Page>
+        <PageHeader title="Active Quizzes" subtitle="Quizzes you can take right now, nearest deadline first." />
+        <Alert message={error} />
 
-        {loading ? (
-          <p className="text-gray-500">Loading...</p>
+        {quizzes === null ? (
+          <Loading />
         ) : quizzes.length === 0 ? (
-          <p className="text-gray-500">No active quizzes available right now.</p>
+          <EmptyState icon={Rocket} title="You're all caught up!" text="There are no quizzes waiting for you right now." />
         ) : (
-          <div className="space-y-4">
-            {quizzes.map(quiz => (
-              <div key={quiz._id} className="bg-white border p-4 rounded-lg shadow-sm">
-                <div className="flex justify-between items-center mb-2">
-                  <h2 className="font-semibold text-lg">{quiz.title}</h2>
-                  <span className="text-sm text-gray-500">
-                    Due: {new Date(quiz.deadline).toLocaleString()}
-                  </span>
-                </div>
-                <div className="text-sm text-gray-600 flex gap-4">
-                  <span className="flex items-center gap-1"><BookOpen className="w-4 h-4" /> {quiz.questions?.length || 0} Questions</span>
-                  <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {quiz.duration} mins</span>
-                </div>
-                <div className="mt-4 text-right">
-                  <Link
-                    to={`/student/quiz/${quiz._id}`}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-                  >
-                    Start Quiz
-                  </Link>
-                </div>
-              </div>
-            ))}
+          <div className="space-y-3">
+            {quizzes.map((quiz) => <QuizCard key={quiz._id} quiz={quiz} />)}
           </div>
         )}
-      </div>
+      </Page>
     </StudentLayout>
   );
 };

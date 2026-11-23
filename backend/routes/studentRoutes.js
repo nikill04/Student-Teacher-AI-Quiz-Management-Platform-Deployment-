@@ -1,169 +1,53 @@
 import express from 'express';
 import {
-  joinBatch,
-  submitQuiz,
-  getStudentResult,
   getStudentProfile,
   getAllBatches,
+  joinBatch,
+  leaveBatch,
   getQuizzesByBatch,
+  getActiveQuizzesForStudent,
   getStudentQuizById,
+  submitQuiz,
   getAllResultsForStudent,
+  getStudentResult,
   getStudentStats,
   getStudentQuizCounts,
-  leaveBatch,
-  getActiveQuizzesForStudent,
 } from '../controllers/studentController.js';
 import { verifyToken, requireRole } from '../middleware/auth.js';
 
 const studentRouter = express.Router();
 
-studentRouter.get('/profile', verifyToken, requireRole('student'), getStudentProfile);
-
-studentRouter.post('/submit', verifyToken, requireRole('student'), submitQuiz);
-studentRouter.get('/result/:quizId', verifyToken, getStudentResult);
-
-studentRouter.get('/my-results', verifyToken, getAllResultsForStudent);
-
-studentRouter.get('/batches', verifyToken, requireRole('student'), getAllBatches);
-studentRouter.post('/join-batch', verifyToken, requireRole('student'), joinBatch);
-studentRouter.get('/quiz/:quizId', verifyToken, getStudentQuizById);
-
-studentRouter.delete('/leave-batch/:batchId',verifyToken,requireRole('student'),leaveBatch);
-
-studentRouter.get('/active-quizzes', verifyToken, requireRole('student'), getActiveQuizzesForStudent);
-
-// studentRouter.get('/stats', verifyToken, requireRole('student'), getStudentStats);
-
-// This is the one your frontend is calling(Dashboard page)
-studentRouter.get('/batch/:batchId/quizzes', verifyToken, requireRole('student'), getQuizzesByBatch);
-
-// studentRouter.get('/quiz-counts', verifyToken, getStudentQuizCounts);
-
-
-export default studentRouter;
+// Every route below needs a logged-in STUDENT
+studentRouter.use(verifyToken, requireRole('student'));
 
 /**
  * @swagger
  * tags:
  *   name: Student
- *   description: Endpoints for student actions
+ *   description: Endpoints for students (login as a student first)
  */
 
 /**
  * @swagger
  * /student/profile:
  *   get:
- *     summary: Get student profile
+ *     summary: Student profile with joined batches
  *     tags: [Student]
  *     responses:
- *       200:
- *         description: Student profile data
- *         content:
- *           application/json:
- *             example:
- *               _id: "64aabb112233"
- *               name: "John Doe"
- *               email: "john@example.com"
- *               role: "student"
+ *       200: { description: Profile }
  */
-studentRouter.get('/profile', verifyToken, requireRole('student'), getStudentProfile);
-
-/**
- * @swagger
- * /student/submit:
- *   post:
- *     summary: Submit a quiz
- *     tags: [Student]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               quizId:
- *                 type: string
- *               answers:
- *                 type: array
- *                 items:
- *                   type: object
- *             example:
- *               quizId: "64bbcc223344"
- *               answers:
- *                 - questionId: "q1"
- *                   answer: "A"
- *                 - questionId: "q2"
- *                   answer: "B"
- *     responses:
- *       200:
- *         description: Quiz submitted successfully
- */
-studentRouter.post('/submit', verifyToken, requireRole('student'), submitQuiz);
-
-/**
- * @swagger
- * /student/result/{quizId}:
- *   get:
- *     summary: Get result for a specific quiz
- *     tags: [Student]
- *     parameters:
- *       - in: path
- *         name: quizId
- *         schema:
- *           type: string
- *         required: true
- *         description: The quiz ID
- *         example: "64bbcc223344"
- *     responses:
- *       200:
- *         description: Quiz result data
- *         content:
- *           application/json:
- *             example:
- *               quizId: "64bbcc223344"
- *               score: 85
- *               totalQuestions: 10
- *               correctAnswers: 8
- */
-studentRouter.get('/result/:quizId', verifyToken, getStudentResult);
-
-/**
- * @swagger
- * /student/my-results:
- *   get:
- *     summary: Get all quiz results for the student
- *     tags: [Student]
- *     responses:
- *       200:
- *         description: List of quiz results
- *         content:
- *           application/json:
- *             example:
- *               - quizId: "64bbcc223344"
- *                 score: 85
- *               - quizId: "64bbcc223355"
- *                 score: 90
- */
-studentRouter.get('/my-results', verifyToken, getAllResultsForStudent);
+studentRouter.get('/profile', getStudentProfile);
 
 /**
  * @swagger
  * /student/batches:
  *   get:
- *     summary: Get all available batches (only names)
+ *     summary: All batches a student can join
  *     tags: [Student]
  *     responses:
- *       200:
- *         description: List of batches
- *         content:
- *           application/json:
- *             example:
- *               - _id: "64aabb112233"
- *                 name: "Batch A"
- *               - _id: "64aabb112234"
- *                 name: "Batch B"
+ *       200: { description: List of batches }
  */
-studentRouter.get('/batches', verifyToken, requireRole('student'), getAllBatches);
+studentRouter.get('/batches', getAllBatches);
 
 /**
  * @swagger
@@ -175,102 +59,11 @@ studentRouter.get('/batches', verifyToken, requireRole('student'), getAllBatches
  *       required: true
  *       content:
  *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - batchId
- *             properties:
- *               batchId:
- *                 type: string
- *                 description: The ID of the batch to join
- *             example:
- *               batchId: "64f2e8d67f23b67c23a8c1a2"
+ *           example: { batchId: "64f2e8d67f23b67c23a8c1a2" }
  *     responses:
- *       200:
- *         description: Successfully joined the batch
- *       400:
- *         description: Missing batchId or already joined
+ *       200: { description: Joined }
  */
-studentRouter.post('/join-batch', verifyToken, requireRole('student'), joinBatch);
-
-/**
- * @swagger
- * /student/quiz/{quizId}:
- *   get:
- *     summary: Get quiz details by ID
- *     tags: [Student]
- *     parameters:
- *       - in: path
- *         name: quizId
- *         schema:
- *           type: string
- *         required: true
- *         description: The ID of the quiz (MongoDB ObjectId)
- *         example: "66b8b6c7e8a0a97d6b74f3ab"
- *     responses:
- *       200:
- *         description: Quiz details retrieved successfully
- */
-studentRouter.get('/quiz/:quizId', verifyToken, getStudentQuizById);
-
-/**
- * @swagger
- * /student/stats:
- *   get:
- *     summary: Get student statistics
- *     tags: [Student]
- *     responses:
- *       200:
- *         description: Student statistics including average score
- *         content:
- *           application/json:
- *             example:
- *               averageScore: 87
- */
-studentRouter.get('/stats', verifyToken, requireRole('student'), getStudentStats);
-
-/**
- * @swagger
- * /student/batch/{batchId}/quizzes:
- *   get:
- *     summary: Get quizzes by batch ID
- *     tags: [Student]
- *     parameters:
- *       - in: path
- *         name: batchId
- *         required: true
- *         schema:
- *           type: string
- *         description: The ID of the batch
- *         example: "64aabb112233"
- *     responses:
- *       200:
- *         description: List of quizzes for the batch
- *         content:
- *           application/json:
- *             example:
- *               - _id: "64bbcc223344"
- *                 title: "Math Quiz 1"
- *                 active: true
- */
-studentRouter.get('/batch/:batchId/quizzes', verifyToken, requireRole('student'), getQuizzesByBatch);
-
-/**
- * @swagger
- * /student/quiz-counts:
- *   get:
- *     summary: Get quiz counts for the student
- *     tags: [Student]
- *     responses:
- *       200:
- *         description: Number of quizzes
- *         content:
- *           application/json:
- *             example:
- *               totalQuizzes: 10
- *               activeQuizzes: 7
- */
-studentRouter.get('/quiz-counts', verifyToken, getStudentQuizCounts);
+studentRouter.post('/join-batch', joinBatch);
 
 /**
  * @swagger
@@ -279,41 +72,112 @@ studentRouter.get('/quiz-counts', verifyToken, getStudentQuizCounts);
  *     summary: Leave a batch
  *     tags: [Student]
  *     parameters:
- *       - in: path
- *         name: batchId
- *         required: true
- *         schema:
- *           type: string
- *         description: The ID of the batch to leave
- *         example: "64aabb112233"
+ *       - { in: path, name: batchId, required: true, schema: { type: string } }
  *     responses:
- *       200:
- *         description: Successfully left the batch
- *         content:
- *           application/json:
- *             example:
- *               message: "Successfully left the batch"
- *       404:
- *         description: Batch not found
- *       500:
- *         description: Server error
+ *       200: { description: Left the batch }
  */
-studentRouter.delete('/leave-batch/:batchId', verifyToken, requireRole('student'), leaveBatch);
+studentRouter.delete('/leave-batch/:batchId', leaveBatch);
+
+/**
+ * @swagger
+ * /student/batch/{batchId}/quizzes:
+ *   get:
+ *     summary: Quizzes of one batch with status (available / completed / overdue)
+ *     tags: [Student]
+ *     parameters:
+ *       - { in: path, name: batchId, required: true, schema: { type: string } }
+ *     responses:
+ *       200: { description: List of quizzes }
+ */
+studentRouter.get('/batch/:batchId/quizzes', getQuizzesByBatch);
 
 /**
  * @swagger
  * /student/active-quizzes:
  *   get:
- *     summary: Get active quizzes for the student
+ *     summary: Quizzes the student can still take
  *     tags: [Student]
  *     responses:
- *       200:
- *         description: List of active quizzes
- *         content:
- *           application/json:
- *             example:
- *               - _id: "64bbcc223344"
- *                 title: "Math Quiz 1"
- *                 active: true
+ *       200: { description: List of active quizzes }
  */
-studentRouter.get('/active-quizzes', verifyToken, requireRole('student'), getActiveQuizzesForStudent);
+studentRouter.get('/active-quizzes', getActiveQuizzesForStudent);
+
+/**
+ * @swagger
+ * /student/quiz/{quizId}:
+ *   get:
+ *     summary: Get quiz questions to take the quiz (without answers)
+ *     tags: [Student]
+ *     parameters:
+ *       - { in: path, name: quizId, required: true, schema: { type: string } }
+ *     responses:
+ *       200: { description: Quiz questions }
+ */
+studentRouter.get('/quiz/:quizId', getStudentQuizById);
+
+/**
+ * @swagger
+ * /student/submit:
+ *   post:
+ *     summary: Submit quiz answers
+ *     tags: [Student]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             quizId: "64bbcc223344"
+ *             timeSpent: "3m 20s"
+ *             answers: [{ questionIndex: 0, selectedOption: 2 }]
+ *     responses:
+ *       201: { description: Submitted }
+ */
+studentRouter.post('/submit', submitQuiz);
+
+/**
+ * @swagger
+ * /student/my-results:
+ *   get:
+ *     summary: All results of the student
+ *     tags: [Student]
+ *     responses:
+ *       200: { description: List of results }
+ */
+studentRouter.get('/my-results', getAllResultsForStudent);
+
+/**
+ * @swagger
+ * /student/result/{quizId}:
+ *   get:
+ *     summary: Detailed result of one quiz
+ *     tags: [Student]
+ *     parameters:
+ *       - { in: path, name: quizId, required: true, schema: { type: string } }
+ *     responses:
+ *       200: { description: Result with question breakdown }
+ */
+studentRouter.get('/result/:quizId', getStudentResult);
+
+/**
+ * @swagger
+ * /student/stats:
+ *   get:
+ *     summary: Average score of the student
+ *     tags: [Student]
+ *     responses:
+ *       200: { description: Stats }
+ */
+studentRouter.get('/stats', getStudentStats);
+
+/**
+ * @swagger
+ * /student/quiz-counts:
+ *   get:
+ *     summary: Total and active quiz counts
+ *     tags: [Student]
+ *     responses:
+ *       200: { description: Counts }
+ */
+studentRouter.get('/quiz-counts', getStudentQuizCounts);
+
+export default studentRouter;

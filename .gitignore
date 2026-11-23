@@ -1,9 +1,10 @@
 # Node modules
 node_modules/
 
-# Environment variables
+# Environment variables (secrets) - but keep the examples
 .env
 .env.*
+!.env.example
 
 # Logs
 *.log
@@ -16,5 +17,3 @@ build/
 .DS_Store
 .vscode/
 .idea/
-
-

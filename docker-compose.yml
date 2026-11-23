@@ -1,40 +1,46 @@
+# Runs the whole app with one command:
+#   docker compose up --build
+# Then open http://localhost:3001  (API docs: http://localhost:5001/api-docs)
+#
+# backend/.env is still used for JWT_SECRET and GROQ_API_KEY.
+# MONGO_URI and REDIS_URL below point to the containers started here.
+
 services:
-  app:
+  backend:
     build: ./backend
     ports:
-      - "5001:5000"
+      - "5001:5001"
     env_file:
-      - ./backend/.env 
+      - ./backend/.env
+    environment:
+      PORT: 5001
+      MONGO_URI: mongodb://mongo:27017/quizapp
+      REDIS_URL: redis://redis:6379
     depends_on:
       - mongo
       - redis
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:5001/api
     ports:
-      - "3001:3000"   
+      - "3001:3000"
     depends_on:
-      - app
+      - backend
 
   mongo:
-    image: mongo:6
-    container_name: quiz-mongo
+    image: mongo:7
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
 
   redis:
-    image: redis:7
-    container_name: quiz-redis
+    image: redis:7-alpine
     ports:
       - "6379:6379"
 
 volumes:
   mongo-data:
-
-
-#commands
-#docker-compose up --build
-#docker ps -a
-#docker compos logs app

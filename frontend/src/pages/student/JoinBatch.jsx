@@ -1,127 +1,114 @@
-import React, { useEffect, useState } from 'react';
-import axios from '../../api/axios';
+import { useEffect, useState } from 'react';
+import { Users, LogOut, Plus } from 'lucide-react';
 import StudentLayout from '../../components/StudentLayout';
+import { Page, PageHeader, Alert, Loading, EmptyState } from '../../components/ui';
+import axios, { getErrorMessage } from '../../api/axios';
 
 const JoinBatch = () => {
-  const [batches, setBatches] = useState([]);
+  const [allBatches, setAllBatches] = useState([]);
+  const [myBatches, setMyBatches] = useState(null); // null = still loading
   const [selectedBatch, setSelectedBatch] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [joinedBatches, setJoinedBatches] = useState([]);
 
-  const fetchBatches = async () => {
+  const loadData = async () => {
     try {
-      const res = await axios.get('/student/batches');
-      setBatches(res.data);
+      const [batchesRes, profileRes] = await Promise.all([
+        axios.get('/student/batches'),
+        axios.get('/student/profile'),
+      ]);
+      setAllBatches(batchesRes.data);
+      setMyBatches(profileRes.data.batches);
     } catch (err) {
-      console.error('Failed to fetch batches');
-      setError('Could not load batches. Please try again later.');
-    }
-  };
-
-  const fetchProfile = async () => {
-    try {
-      const res = await axios.get('/student/profile');
-      setJoinedBatches(res.data.batches || []);
-    } catch (err) {
-      console.error('Failed to fetch joined batches');
-      setError('Could not load your joined batches.');
+      setMyBatches([]);
+      setError(getErrorMessage(err, 'Could not load batches'));
     }
   };
 
   useEffect(() => {
-    fetchBatches();
-    fetchProfile();
+    loadData();
   }, []);
 
-  const handleJoin = async () => {
+  // Only show batches the student has NOT joined yet in the dropdown
+  const joinedIds = (myBatches || []).map((b) => b._id);
+  const availableBatches = allBatches.filter((b) => !joinedIds.includes(b._id));
+
+  const handleJoin = async (e) => {
+    e.preventDefault();
+    setMessage('');
+    setError('');
     try {
-      setMessage('');
-      setError('');
       const res = await axios.post('/student/join-batch', { batchId: selectedBatch });
-      setMessage(res.data.message || 'Successfully joined the batch');
-      fetchProfile(); // Refresh joined batches
+      setMessage(res.data.message);
+      setSelectedBatch('');
+      loadData();
     } catch (err) {
-      setMessage('');
-      setError(err.response?.data?.message || 'Failed to join batch');
+      setError(getErrorMessage(err, 'Failed to join batch'));
     }
   };
 
-  const handleLeave = async (batchId) => {
+  const handleLeave = async (batch) => {
+    if (!window.confirm(`Leave "${batch.name}"? You will stop seeing its quizzes.`)) return;
+    setMessage('');
+    setError('');
     try {
-      setMessage('');
-      setError('');
-      const res = await axios.delete(`/student/leave-batch/${batchId}`);
-      setMessage(res.data.message || 'Left the batch successfully');
-      fetchProfile(); // Refresh joined batches
+      const res = await axios.delete(`/student/leave-batch/${batch._id}`);
+      setMessage(res.data.message);
+      loadData();
     } catch (err) {
-      setError(err.response?.data?.message+"58" || 'Failed to leave the batch');
+      setError(getErrorMessage(err, 'Failed to leave the batch'));
     }
   };
 
   return (
     <StudentLayout>
-      <div className="p-6 max-w-2xl mx-auto">
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">Join a Batch</h2>
+      <Page className="max-w-3xl">
+        <PageHeader title="Batches" subtitle="Join your teacher's batch to receive their quizzes." />
+        <Alert type="success" message={message} />
+        <Alert message={error} />
 
-        {error && <p className="mb-4 text-red-600">{error}</p>}
-        {message && <p className="mb-4 text-green-600">{message}</p>}
-
-        {/* Join Batch Select */}
-        <div className="mb-6">
-          <select
-            className="border border-gray-300 p-2 w-full mb-4 rounded"
-            value={selectedBatch}
-            onChange={(e) => setSelectedBatch(e.target.value)}
-          >
-            <option value="">Select a Batch</option>
-            {batches.map((batch) => (
-              <option key={batch._id} value={batch._id}>
-                {batch.name}
+        {/* Join form */}
+        <form onSubmit={handleJoin} className="card mb-8 p-5">
+          <label className="label" htmlFor="batch">Join a new batch</label>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <select id="batch" className="input" value={selectedBatch} onChange={(e) => setSelectedBatch(e.target.value)}>
+              <option value="">
+                {availableBatches.length ? 'Select a batch...' : 'No other batches available'}
               </option>
-            ))}
-          </select>
-
-          <button
-            className={`px-4 py-2 rounded w-full ${
-              selectedBatch
-                ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
-            onClick={handleJoin}
-            disabled={!selectedBatch}
-          >
-            Join
-          </button>
-        </div>
-
-        
-
-        {/* Joined Batches */}
-        <div>
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">Your Batches</h3>
-          {joinedBatches.length === 0 ? (
-            <p className="text-gray-500">You haven't joined any batches yet.</p>
-          ) : (
-            <ul className="space-y-2">
-              {joinedBatches.map((batch) => (
-                <li
-                  key={batch._id}
-                  className="flex justify-between items-center border p-3 rounded bg-white"
-                >
-                  <span className="font-medium text-gray-800">{batch.name}</span>
-                  <button
-                    onClick={() => handleLeave(batch._id)}
-                    className="text-red-600 hover:underline text-sm"
-                  >
-                    Leave
-                  </button>
-                </li>
+              {availableBatches.map((batch) => (
+                <option key={batch._id} value={batch._id}>
+                  {batch.name}{batch.teacher?.name ? ` (by ${batch.teacher.name})` : ''}
+                </option>
               ))}
-            </ul>
-          )}
-        </div>
-      </div>
+            </select>
+            <button type="submit" disabled={!selectedBatch} className="btn-primary shrink-0">
+              <Plus className="h-4 w-4" /> Join
+            </button>
+          </div>
+        </form>
+
+        {/* Joined batches */}
+        <h2 className="mb-3 text-lg font-semibold text-slate-900">Your batches</h2>
+        {myBatches === null ? (
+          <Loading />
+        ) : myBatches.length === 0 ? (
+          <EmptyState icon={Users} title="No batches joined yet" text="Pick a batch above to get started." />
+        ) : (
+          <ul className="space-y-3">
+            {myBatches.map((batch) => (
+              <li key={batch._id} className="card flex items-center justify-between p-4">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-lg bg-indigo-50 p-2"><Users className="h-5 w-5 text-indigo-600" /></div>
+                  <span className="font-medium text-slate-900">{batch.name}</span>
+                </div>
+                <button onClick={() => handleLeave(batch)} className="btn-danger px-3 py-1.5">
+                  <LogOut className="h-4 w-4" /> Leave
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Page>
     </StudentLayout>
   );
 };

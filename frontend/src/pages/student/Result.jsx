@@ -1,216 +1,125 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Trophy, CheckCircle2, XCircle, ArrowLeft, Share2, MessageCircle, MinusCircle } from 'lucide-react';
 import StudentLayout from '../../components/StudentLayout';
-import {
-  Trophy,
-  CheckCircle,
-  XCircle,
-  ArrowLeft,
-  Share2,
-} from 'lucide-react';
-import axios from '../../api/axios';
+import { Page, Loading, Alert, formatDate } from '../../components/ui';
+import axios, { getErrorMessage } from '../../api/axios';
+
+// Colour of the score card depending on the score
+const scoreStyle = (score) => {
+  if (score >= 80) return { box: 'border-emerald-200 bg-emerald-50', text: 'text-emerald-600', label: 'Excellent work!' };
+  if (score >= 50) return { box: 'border-indigo-200 bg-indigo-50', text: 'text-indigo-600', label: 'Good job!' };
+  return { box: 'border-red-200 bg-red-50', text: 'text-red-600', label: 'Keep practicing!' };
+};
 
 const StudentResult = () => {
   const { quizId } = useParams();
-  const [resultData, setResultData] = useState(null);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const fetchResult = async () => {
-      try {
-        const res = await axios.get(`/student/result/${quizId}`);
-        setResultData(res.data);
-      } catch (err) {
-        console.error('Failed to fetch result:', err);
-      }
-    };
-
-    fetchResult();
+    axios
+      .get(`/student/result/${quizId}`)
+      .then((res) => setResult(res.data))
+      .catch((err) => setError(getErrorMessage(err, 'Could not load the result')));
   }, [quizId]);
 
-  const getScoreColor = (score) => {
-    if (score >= 90) return 'text-green-600';
-    if (score >= 70) return 'text-blue-600';
-    if (score >= 50) return 'text-yellow-600';
-    return 'text-red-600';
+  // Copies a short summary of the result so the student can paste it anywhere
+  const shareResult = async () => {
+    const text = `I scored ${result.score}% (${result.correctAnswers}/${result.totalQuestions}) on "${result.quizTitle}" in QuizAI!`;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      window.prompt('Copy your result:', text);
+    }
   };
-
-  const getScoreBgColor = (score) => {
-    if (score >= 90) return 'bg-green-100';
-    if (score >= 70) return 'bg-blue-100';
-    if (score >= 50) return 'bg-yellow-100';
-    return 'bg-red-100';
-  };
-
-  if (!resultData) return <div className="p-8">Loading result...</div>;
 
   return (
     <StudentLayout>
-      <div className="p-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Quiz Results
-              </h1>
-              <p className="text-gray-600">{resultData.quizTitle}</p>
-            </div>
-            <Link
-              to="/student/dashboard"
-              className="flex items-center space-x-2 text-teal-600 hover:text-teal-700 transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5" />
-              <span>Back to Dashboard</span>
-            </Link>
-          </div>
+      <Page className="max-w-4xl">
+        <Link to="/student/my-results" className="mb-4 inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-800">
+          <ArrowLeft className="h-4 w-4" /> My Results
+        </Link>
+        <Alert message={error} />
 
-          {/* Score Card */}
-          <div
-            className={`${getScoreBgColor(
-              resultData.score
-            )} rounded-2xl p-8 mb-8 border-2 ${
-              resultData.score >= 90
-                ? 'border-green-200'
-                : resultData.score >= 70
-                ? 'border-blue-200'
-                : resultData.score >= 50
-                ? 'border-yellow-200'
-                : 'border-red-200'
-            }`}
-          >
-            <div className="text-center">
-              <div className="flex justify-center mb-4">
-                <Trophy
-                  className={`h-16 w-16 ${getScoreColor(resultData.score)}`}
-                />
-              </div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-2">
-                {resultData.score}%
-              </h2>
-              <p className="text-lg text-gray-700 mb-4">
-                {resultData.correctAnswers} out of {resultData.totalQuestions}{' '}
-                correct
+        {!result && !error && <Loading text="Loading result..." />}
+
+        {result && (
+          <>
+            {/* Score card */}
+            <div className={`mb-6 rounded-2xl border-2 p-8 text-center ${scoreStyle(result.score).box}`}>
+              <Trophy className={`mx-auto mb-3 h-12 w-12 ${scoreStyle(result.score).text}`} />
+              <p className="text-sm font-medium text-slate-600">{result.quizTitle}</p>
+              <p className={`text-5xl font-extrabold ${scoreStyle(result.score).text}`}>{result.score}%</p>
+              <p className="mt-1 font-semibold text-slate-800">{scoreStyle(result.score).label}</p>
+              <p className="mt-2 text-slate-600">
+                {result.correctAnswers} of {result.totalQuestions} correct - time spent {result.timeSpent} - {formatDate(result.completedAt, '')}
               </p>
-              <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
-                <div className="text-center">
-                  <p className="text-sm text-gray-600">Completed At</p>
-                  <p className="font-medium text-gray-900">
-                    {new Date(resultData.completedAt).toLocaleString()}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-sm text-gray-600">Time Spent</p>
-                  <p className="font-medium text-gray-900">
-                    {resultData.timeSpent}
-                  </p>
-                </div>
+              <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+                <button onClick={shareResult} className="btn-secondary">
+                  <Share2 className="h-4 w-4" /> {copied ? 'Copied!' : 'Share Result'}
+                </button>
+                <Link to="/student/ask-ai" className="btn-primary">
+                  <MessageCircle className="h-4 w-4" /> Ask AI for Help
+                </Link>
               </div>
             </div>
-          </div>
 
-          {/* Action Buttons */}
-          <div className="flex justify-center space-x-4 mb-8">
-            <button className="flex items-center space-x-2 bg-teal-600 text-white px-6 py-3 rounded-lg hover:bg-teal-700 transition-colors">
-              <Share2 className="h-5 w-5" />
-              <span>Share Result</span>
-            </button>
-            <Link
-              to="/student/ask-ai"
-              className="flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <span>Ask AI for Help</span>
-            </Link>
-          </div>
-
-          {/* Question Breakdown */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">
-              Question Breakdown
-            </h3>
-
-            <div className="space-y-6">
-              {resultData.questions.map((question, index) => {
-                const userAnswer = question.userAnswer;
-                const correctAnswer = question.correctAnswer;
-                const isCorrect = userAnswer === correctAnswer;
-
+            {/* Answers */}
+            <h2 className="mb-3 text-lg font-semibold text-slate-900">Question breakdown</h2>
+            <div className="space-y-4">
+              {result.questions.map((q, index) => {
+                const notAnswered = q.userAnswer === -1;
                 return (
-                  <div
-                    key={index}
-                    className="border border-gray-200 rounded-lg p-6"
-                  >
-                    <div className="flex items-start space-x-4">
-                      <div className="flex-shrink-0">
-                        {isCorrect ? (
-                          <CheckCircle className="h-6 w-6 text-green-600" />
-                        ) : (
-                          <XCircle className="h-6 w-6 text-red-600" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-900 mb-3">
-                          Question {index + 1}: {question.question}
-                        </h4>
-
-                        <div className="space-y-2 mb-4">
-                          {question.options.map((option, optionIndex) => {
-                            const isCorrectOpt =
-                              optionIndex === correctAnswer;
-                            const isUserOpt = optionIndex === userAnswer;
-                            const isWrong =
-                              isUserOpt && !isCorrectOpt;
-
-                            let bgClass = 'bg-gray-50 border-gray-200';
-                            if (isCorrectOpt) {
-                              bgClass = 'bg-green-50 border-green-200';
-                            } else if (isWrong) {
-                              bgClass = 'bg-red-50 border-red-200';
-                            }
-
-                            return (
-                              <div
-                                key={optionIndex}
-                                className={`p-3 rounded-lg border ${bgClass}`}
-                              >
-                                <div className="flex items-center space-x-2">
-                                  <span className="font-medium">
-                                    {String.fromCharCode(65 + optionIndex)}.
-                                  </span>
-                                  <span className="flex-1">{option}</span>
-
-                                  {isCorrectOpt && (
-                                    <span className="text-green-600 text-sm font-medium">
-                                      ✓ Correct
-                                    </span>
-                                  )}
-                                  {isWrong && (
-                                    <span className="text-red-600 text-sm font-medium">
-                                      ✗ Your Answer
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                          <p className="text-sm font-medium text-blue-900 mb-1">
-                            Explanation:
-                          </p>
-                          <p className="text-sm text-blue-800">
-                            {question.explanation}
-                          </p>
-                        </div>
-                      </div>
+                  <div key={index} className="card p-5">
+                    <div className="mb-3 flex items-start gap-3">
+                      {q.isCorrect ? (
+                        <CheckCircle2 className="h-6 w-6 shrink-0 text-emerald-600" />
+                      ) : notAnswered ? (
+                        <MinusCircle className="h-6 w-6 shrink-0 text-slate-400" />
+                      ) : (
+                        <XCircle className="h-6 w-6 shrink-0 text-red-600" />
+                      )}
+                      <h3 className="font-medium text-slate-900">
+                        {index + 1}. {q.question}
+                        {notAnswered && <span className="badge-gray ml-2">Not answered</span>}
+                      </h3>
                     </div>
+
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {q.options.map((option, optionIndex) => {
+                        const isCorrect = optionIndex === q.correctAnswer;
+                        const isWrongPick = optionIndex === q.userAnswer && !isCorrect;
+                        return (
+                          <div key={optionIndex}
+                            className={`rounded-lg border p-2.5 text-sm ${
+                              isCorrect ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                                : isWrongPick ? 'border-red-300 bg-red-50 text-red-800'
+                                : 'border-slate-200 text-slate-600'
+                            }`}>
+                            <span className="font-semibold">{String.fromCharCode(65 + optionIndex)}.</span> {option}
+                            {isCorrect && <span className="ml-1 font-semibold"> - Correct</span>}
+                            {isWrongPick && <span className="ml-1 font-semibold"> - Your answer</span>}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {q.explanation && (
+                      <p className="mt-3 rounded-lg bg-indigo-50 p-3 text-sm text-indigo-900">
+                        <span className="font-semibold">Explanation: </span>{q.explanation}
+                      </p>
+                    )}
                   </div>
                 );
               })}
             </div>
-          </div>
-        </div>
-      </div>
+          </>
+        )}
+      </Page>
     </StudentLayout>
   );
 };

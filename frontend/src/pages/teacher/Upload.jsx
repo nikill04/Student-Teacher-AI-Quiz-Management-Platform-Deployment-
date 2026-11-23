@@ -1,250 +1,191 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Upload, FileText, Brain, Loader2, Trash2, RotateCcw, Send } from 'lucide-react';
 import TeacherLayout from '../../components/TeacherLayout';
-import { Upload, FileText, Brain, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
-import axios from '../../api/axios';
+import QuizDetailsFields from '../../components/QuizDetailsFields';
+import { Page, PageHeader, Alert } from '../../components/ui';
+import axios, { getErrorMessage } from '../../api/axios';
 
 const TeacherUpload = () => {
-  const [file, setFile] = useState(null);
+  const navigate = useNavigate();
   const [batches, setBatches] = useState([]);
-  const [selectedBatch, setSelectedBatch] = useState('');
-  const [generatedQuiz, setGeneratedQuiz] = useState(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [error, setError] = useState('');
+  const [details, setDetails] = useState({ title: '', batchId: '', deadline: '', duration: 30 });
+  const [file, setFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
-  const [title, setTitle] = useState('');
-  const [deadline, setDeadline] = useState('');
-  const [duration, setDuration] = useState(30); // default 30 minutes
+  const [questions, setQuestions] = useState(null); // null = not generated yet
+  const [generating, setGenerating] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const loadBatches = async () => {
-      try {
-        const res = await axios.get('/teacher/batches');
-        setBatches(res.data || []);
-      } catch {
-        setError('Failed to load batches.');
-      }
-    };
-    loadBatches();
+    axios
+      .get('/teacher/batches')
+      .then((res) => setBatches(res.data))
+      .catch((err) => setError(getErrorMessage(err, 'Could not load batches')));
   }, []);
 
+  // ---------- Choosing a file ----------
+  const pickFile = (selected) => {
+    if (!selected) return;
+    if (selected.type !== 'application/pdf') {
+      setError('Please choose a PDF file.');
+      return;
+    }
+    setError('');
+    setFile(selected);
+  };
+
   const handleDrag = (e) => {
-    e.preventDefault(); e.stopPropagation();
+    e.preventDefault();
     setDragActive(e.type === 'dragenter' || e.type === 'dragover');
   };
 
   const handleDrop = (e) => {
-    e.preventDefault(); e.stopPropagation();
+    e.preventDefault();
     setDragActive(false);
-    if (e.dataTransfer.files?.[0]) {
-      setFile(e.dataTransfer.files[0]);
-    }
+    pickFile(e.dataTransfer.files?.[0]);
   };
 
-  const handleFileChange = (e) => {
-    if (e.target.files?.[0]) setFile(e.target.files[0]);
-  };
+  // ---------- Step 1: generate questions with AI ----------
+  const generateQuiz = async (e) => {
+    e.preventDefault();
+    if (!file) return setError('Please choose a PDF file first.');
 
-  const generateQuiz = async () => {
-    if (!file || !selectedBatch) return;
     setError('');
-    setIsGenerating(true);
+    setGenerating(true);
     const form = new FormData();
     form.append('file', file);
-    form.append('batchId', selectedBatch);
+    form.append('batchId', details.batchId);
 
     try {
-      const res = await axios.post('/teacher/upload-and-generate', form, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      setGeneratedQuiz(res.data.quiz);
+      const res = await axios.post('/teacher/upload-and-generate', form);
+      setQuestions(res.data.quiz.questions);
     } catch (err) {
-      console.error(err);
-      setError('Failed to generate quiz.');
+      setError(getErrorMessage(err, 'Failed to generate quiz.'));
     } finally {
-      setIsGenerating(false);
+      setGenerating(false);
     }
   };
 
+  // ---------- Step 2: review and publish ----------
+  const setCorrect = (qIndex, optionIndex) =>
+    setQuestions(questions.map((q, i) => (i === qIndex ? { ...q, correct: optionIndex } : q)));
+
+  const removeQuestion = (qIndex) => setQuestions(questions.filter((_, i) => i !== qIndex));
+
   const publishQuiz = async () => {
-  try {
-    await axios.post(
-      '/teacher/publish-quiz',
-      {
-        batchId: selectedBatch,
-        quiz: {
-          title,
-          deadline,
-          duration,
-          source: 'manual',
-          questions: generatedQuiz.questions
-        }
-      },
-      {
-        withCredentials: true // ✅ include cookies (token) in request
-      }
-    );
-
-    alert('Quiz published successfully!');
-    setFile(null);
-    setSelectedBatch('');
-    setGeneratedQuiz(null);
-    setTitle('');
-    setDeadline('');
-    setDuration(30);
-  } catch (err) {
-    console.error(err);
-    alert(err?.response?.data?.error || 'Publishing failed.');
-  }
-};
-
+    setError('');
+    setPublishing(true);
+    try {
+      await axios.post('/teacher/publish-quiz', {
+        batchId: details.batchId,
+        quiz: { ...details, source: 'ai', questions },
+      });
+      navigate('/teacher/quizzes', { state: { message: `Quiz "${details.title}" published!` } });
+    } catch (err) {
+      setError(getErrorMessage(err, 'Publishing failed.'));
+    } finally {
+      setPublishing(false);
+    }
+  };
 
   return (
     <TeacherLayout>
-      <div className="p-8">
-        <h1 className="text-3xl font-bold mb-2">Create Quiz with AI</h1>
-        <p className="text-gray-600 mb-6">Upload a PDF and let AI generate the quiz.</p>
+      <Page className="max-w-4xl">
+        <PageHeader title="AI Quiz from PDF" subtitle="Upload study material and let AI write the questions. You can review them before publishing." />
+        <Alert message={error} />
 
-        {error && (
-          <div className="bg-red-100 text-red-700 p-3 rounded mb-4 flex items-center">
-            <AlertCircle className="mr-2" /> {error}
-          </div>
-        )}
-
-        {!generatedQuiz ? (
-          <div className="space-y-6 max-w-2xl mx-auto">
-            <div
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
-              className={`border-2 rounded-xl p-6 text-center ${dragActive ? 'border-blue-600 bg-blue-50' : 'border-gray-300'}`}
-            >
-              <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-              <p className="font-medium mb-1">Drag PDF here or click to upload</p>
-              <input type="file" accept=".pdf" id="file-upload" hidden onChange={handleFileChange} />
-              <label htmlFor="file-upload" className="inline-block mt-3 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 cursor-pointer">
-                Select File
-              </label>
+        {!questions ? (
+          /* ---------- STEP 1: upload form ---------- */
+          <form onSubmit={generateQuiz} className="space-y-6">
+            <div className="card p-6">
+              <h2 className="mb-4 font-semibold text-slate-900">1. Quiz details</h2>
+              <QuizDetailsFields details={details} onChange={setDetails} batches={batches} />
             </div>
 
-            {file && (
-              <div className="flex items-center bg-green-50 border border-green-200 rounded p-3">
-                <FileText className="w-5 h-5 text-green-600 mr-3" />
-                <div>
-                  <p className="text-green-800 font-semibold">{file.name}</p>
-                  <p className="text-green-600 text-sm">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                </div>
-              </div>
-            )}
-
-            <div>
-              <label className="block font-semibold mb-2">Select Batch</label>
-              <select
-                value={selectedBatch}
-                onChange={(e) => setSelectedBatch(e.target.value)}
-                className="w-full border rounded p-3"
+            <div className="card p-6">
+              <h2 className="mb-4 font-semibold text-slate-900">2. Study material (PDF)</h2>
+              <label
+                htmlFor="file-upload"
+                onDragEnter={handleDrag}
+                onDragOver={handleDrag}
+                onDragLeave={handleDrag}
+                onDrop={handleDrop}
+                className={`flex cursor-pointer flex-col items-center rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
+                  dragActive ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'
+                }`}
               >
-                <option value="">Choose a batch</option>
-                {batches.map(b => (
-                  <option key={b._id} value={b._id}>{b.name}</option>
-                ))}
-              </select>
+                {file ? (
+                  <>
+                    <FileText className="mb-2 h-10 w-10 text-indigo-600" />
+                    <p className="font-semibold text-slate-900">{file.name}</p>
+                    <p className="text-sm text-slate-500">{(file.size / 1024 / 1024).toFixed(2)} MB - click to change</p>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="mb-2 h-10 w-10 text-slate-400" />
+                    <p className="font-semibold text-slate-900">Drag a PDF here or click to choose</p>
+                    <p className="text-sm text-slate-500">Text PDFs only, max 10 MB</p>
+                  </>
+                )}
+              </label>
+              <input id="file-upload" type="file" accept="application/pdf" hidden
+                onChange={(e) => pickFile(e.target.files?.[0])} />
             </div>
 
-            <div>
-              <label className="block font-semibold mb-2">Quiz Title</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Enter quiz title"
-                className="w-full border rounded p-3"
-              />
-            </div>
-
-            <div>
-              <label className="block font-semibold mb-2">Deadline</label>
-              <input
-                type="datetime-local"
-                value={deadline}
-                onChange={(e) => setDeadline(e.target.value)}
-                className="w-full border rounded p-3"
-              />
-            </div>
-
-            <div>
-              <label className="block font-semibold mb-2">Duration (minutes)</label>
-              <input
-                type="number"
-                value={duration}
-                onChange={(e) => setDuration(Number(e.target.value))}
-                className="w-full border rounded p-3"
-                min="1"
-              />
-            </div>
-
-            <button
-              onClick={generateQuiz}
-              disabled={!file || !selectedBatch || isGenerating}
-              className={`w-full py-3 rounded-lg font-medium flex justify-center items-center space-x-2 ${
-                isGenerating ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'
-              }`}
-            >
-              {isGenerating
-                ? (<><Loader2 className="w-5 h-5 animate-spin" /><span>Generating Quiz...</span></>)
-                : (<><Brain className="w-5 h-5" /><span>Generate Quiz with AI</span></>)
-              }
+            <button type="submit" disabled={generating || !file} className="btn-primary w-full py-3">
+              {generating ? (
+                <><Loader2 className="h-5 w-5 animate-spin" /> Generating questions... (this can take ~10 seconds)</>
+              ) : (
+                <><Brain className="h-5 w-5" /> Generate Quiz with AI</>
+              )}
             </button>
-          </div>
+          </form>
         ) : (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold">Quiz Preview</h2>
-              <div className="flex items-center text-green-600">
-                <CheckCircle className="w-5 h-5 mr-1" />
-                <span>Generated</span>
+          /* ---------- STEP 2: review generated questions ---------- */
+          <div className="space-y-4">
+            <div className="card flex flex-col gap-1 p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="font-semibold text-slate-900">{details.title}</h2>
+                <p className="text-sm text-slate-500">
+                  {questions.length} questions - {details.duration} min. Click an option to change the correct answer.
+                </p>
               </div>
+              <button onClick={() => setQuestions(null)} className="btn-secondary">
+                <RotateCcw className="h-4 w-4" /> Start over
+              </button>
             </div>
 
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold">Title: {title}</h3>
-              {deadline && <p className="text-sm text-gray-600">Deadline: {new Date(deadline).toLocaleString()}</p>}
-              <p className="text-sm text-gray-600">Duration: {duration} minutes</p>
-            </div>
-
-            {generatedQuiz.questions.map((q, index) => (
-              <div key={index} className="border rounded p-4">
-                <h4 className="font-semibold mb-2">Q{index + 1}: {q.question}</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  {q.options.map((opt, i) => (
-                    <div key={i} className={`p-2 rounded border ${
-                      i === q.correct ? 'bg-green-50 border-green-300 text-green-800' : 'bg-gray-50 border-gray-200'
-                    }`}>
-                      <span>{String.fromCharCode(65 + i)}. {opt}</span>
-                      {i === q.correct && <span className="ml-2 text-green-600">✓</span>}
-                    </div>
+            {questions.map((q, qIndex) => (
+              <div key={qIndex} className="card p-5">
+                <div className="mb-3 flex items-start justify-between gap-3">
+                  <h3 className="font-medium text-slate-900">{qIndex + 1}. {q.question}</h3>
+                  <button onClick={() => removeQuestion(qIndex)} className="text-slate-400 hover:text-red-600" aria-label="Remove question">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {q.options.map((option, optionIndex) => (
+                    <button key={optionIndex} type="button" onClick={() => setCorrect(qIndex, optionIndex)}
+                      className={`rounded-lg border p-2.5 text-left text-sm transition-colors ${
+                        q.correct === optionIndex
+                          ? 'border-emerald-400 bg-emerald-50 font-medium text-emerald-800'
+                          : 'border-slate-200 hover:bg-slate-50'
+                      }`}>
+                      {String.fromCharCode(65 + optionIndex)}. {option} {q.correct === optionIndex && '✓'}
+                    </button>
                   ))}
                 </div>
               </div>
             ))}
 
-            <div className="flex gap-4">
-              <button
-                onClick={publishQuiz}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded font-semibold"
-              >
-                Publish Quiz
-              </button>
-              <button
-                onClick={() => setGeneratedQuiz(null)}
-                className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 rounded font-semibold"
-              >
-                Generate New
-              </button>
-            </div>
+            <button onClick={publishQuiz} disabled={publishing || questions.length === 0} className="btn-success w-full py-3">
+              <Send className="h-4 w-4" />
+              {publishing ? 'Publishing...' : `Publish Quiz (${questions.length} questions)`}
+            </button>
           </div>
         )}
-      </div>
+      </Page>
     </TeacherLayout>
   );
 };

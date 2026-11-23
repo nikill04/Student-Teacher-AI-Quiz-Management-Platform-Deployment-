@@ -1,188 +1,114 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { Brain, BookOpen, Users, BarChart3, Zap, CheckCircle } from 'lucide-react';
+import { Brain, BookOpen, BarChart3, MessageCircle, Upload, Timer, Users, ArrowRight } from 'lucide-react';
+import { useAuth, dashboardPath } from '../context/AuthContext';
+
+const features = [
+  { icon: Upload, title: 'AI Quiz from PDF', text: 'Upload your notes as a PDF and get 10 ready-to-use questions in seconds.' },
+  { icon: BookOpen, title: 'Manual Quiz Builder', text: 'Write your own questions with a simple form when you want full control.' },
+  { icon: Users, title: 'Batches', text: 'Group students into batches and publish quizzes to a whole batch at once.' },
+  { icon: Timer, title: 'Timed Quizzes', text: 'Set a duration and a deadline. Quizzes submit automatically when time is up.' },
+  { icon: BarChart3, title: 'Leaderboard & Export', text: 'See rankings per batch or quiz and export them to Excel with one click.' },
+  { icon: MessageCircle, title: 'AI Tutor', text: 'Students can ask the AI tutor any study question and get a simple answer.' },
+];
 
 const LandingPage = () => {
+  const { user } = useAuth();
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-50">
-      {/* Header */}
-      <nav className="bg-white shadow-sm border-b border-blue-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <Brain className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900">QuizAI</span>
+    <div className="min-h-screen bg-white">
+      {/* Navbar */}
+      <nav className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="rounded-lg bg-indigo-600 p-1.5">
+              <Brain className="h-5 w-5 text-white" />
             </div>
-            <div className="flex items-center space-x-4">
-              <Link
-                to="/login"
-                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Login
-              </Link>
-              <Link
-                to="/register"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-              >
-                Get Started
-              </Link>
+            <span className="text-lg font-bold text-slate-900">QuizAI</span>
+          </Link>
+          {user ? (
+            <Link to={dashboardPath(user.role)} className="btn-primary">
+              Go to Dashboard
+            </Link>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link to="/login" className="btn-secondary border-transparent">Login</Link>
+              <Link to="/register" className="btn-primary">Get Started</Link>
             </div>
-          </div>
+          )}
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Empowering Assessments with
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-600">
-                {' '}AI
-              </span>
-            </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Transform your teaching and learning experience with AI-powered quiz generation, 
-              intelligent doubt resolution, and comprehensive analytics.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
-              <Link
-                to="/register"
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-medium hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl"
-              >
-                Start Teaching
-              </Link>
-              <Link
-                to="/register"
-                className="bg-teal-600 text-white px-8 py-3 rounded-lg text-lg font-medium hover:bg-teal-700 transition-colors shadow-lg hover:shadow-xl"
-              >
-                Start Learning
-              </Link>
-            </div>
+      {/* Hero */}
+      <section className="bg-gradient-to-b from-indigo-50 to-white">
+        <div className="mx-auto max-w-4xl px-4 py-20 text-center sm:py-28">
+          <span className="badge-blue mb-6">AI-powered quizzes for classrooms</span>
+          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl">
+            Create quizzes in seconds. <span className="text-indigo-600">Learn smarter.</span>
+          </h1>
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-600">
+            Teachers turn study material into quizzes with AI. Students take timed quizzes,
+            see instant results and get help from an AI tutor.
+          </p>
+          <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
+            <Link to="/register?role=teacher" className="btn-primary px-6 py-3 text-base">
+              I'm a Teacher <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link to="/register?role=student" className="btn-secondary px-6 py-3 text-base">
+              I'm a Student <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Features Section */}
-      <div className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Why Choose QuizAI?
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Our platform combines the power of AI with intuitive design to make assessments smarter and more engaging.
-            </p>
+      {/* Features */}
+      <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+        <div className="mb-12 text-center">
+          <h2 className="text-3xl font-bold text-slate-900">Everything you need</h2>
+          <p className="mt-2 text-slate-600">Simple tools for teachers and students.</p>
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((feature) => (
+            <div key={feature.title} className="card p-6 transition-shadow hover:shadow-md">
+              <div className="mb-4 inline-flex rounded-xl bg-indigo-50 p-3">
+                <feature.icon className="h-6 w-6 text-indigo-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900">{feature.title}</h3>
+              <p className="mt-2 text-sm text-slate-600">{feature.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="bg-slate-50">
+        <div className="mx-auto grid max-w-6xl gap-6 px-4 py-20 sm:px-6 md:grid-cols-2">
+          <div className="card p-8">
+            <h3 className="mb-4 text-xl font-bold text-slate-900">For Teachers</h3>
+            <ol className="space-y-3 text-slate-600">
+              <li>1. Create a batch for your class</li>
+              <li>2. Upload a PDF or write questions yourself</li>
+              <li>3. Publish and watch the leaderboard</li>
+            </ol>
           </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-2xl border border-blue-200">
-              <div className="bg-blue-600 w-12 h-12 rounded-xl flex items-center justify-center mb-6">
-                <Brain className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">AI Quiz Generation</h3>
-              <p className="text-gray-600">
-                Upload your materials and let AI generate comprehensive quizzes in seconds. Save time and ensure quality.
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-br from-teal-50 to-teal-100 p-8 rounded-2xl border border-teal-200">
-              <div className="bg-teal-600 w-12 h-12 rounded-xl flex items-center justify-center mb-6">
-                <Users className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Smart Doubt Resolution</h3>
-              <p className="text-gray-600">
-                Students can ask questions anytime and get instant, intelligent responses from our AI tutor.
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl border border-green-200">
-              <div className="bg-green-600 w-12 h-12 rounded-xl flex items-center justify-center mb-6">
-                <BarChart3 className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Comprehensive Analytics</h3>
-              <p className="text-gray-600">
-                Track student progress with detailed insights and leaderboards to identify strengths and areas for improvement.
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-2xl border border-purple-200">
-              <div className="bg-purple-600 w-12 h-12 rounded-xl flex items-center justify-center mb-6">
-                <BookOpen className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Easy Quiz Creation</h3>
-              <p className="text-gray-600">
-                Create quizzes manually or with AI assistance. Both options are designed for maximum efficiency.
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-8 rounded-2xl border border-orange-200">
-              <div className="bg-orange-600 w-12 h-12 rounded-xl flex items-center justify-center mb-6">
-                <Zap className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Real-time Results</h3>
-              <p className="text-gray-600">
-                Get instant feedback and detailed explanations for each question to enhance the learning experience.
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-br from-pink-50 to-pink-100 p-8 rounded-2xl border border-pink-200">
-              <div className="bg-pink-600 w-12 h-12 rounded-xl flex items-center justify-center mb-6">
-                <CheckCircle className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Mobile Friendly</h3>
-              <p className="text-gray-600">
-                Access your quizzes and results from any device. Perfect for students on the go.
-              </p>
-            </div>
+          <div className="card p-8">
+            <h3 className="mb-4 text-xl font-bold text-slate-900">For Students</h3>
+            <ol className="space-y-3 text-slate-600">
+              <li>1. Join your teacher's batch</li>
+              <li>2. Take quizzes before the deadline</li>
+              <li>3. Review answers and ask the AI tutor</li>
+            </ol>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <Brain className="h-8 w-8 text-blue-400" />
-                <span className="text-xl font-bold">QuizAI</span>
-              </div>
-              <p className="text-gray-400">
-                Empowering education through intelligent assessments and AI-powered learning.
-              </p>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Platform</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">For Teachers</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">For Students</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Support</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Status</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Cookie Policy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-              </ul>
-            </div>
+      <footer className="border-t border-slate-200">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-8 text-sm text-slate-500 sm:flex-row sm:px-6">
+          <div className="flex items-center gap-2">
+            <Brain className="h-4 w-4 text-indigo-600" />
+            <span className="font-semibold text-slate-700">QuizAI</span>
           </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 QuizAI. All rights reserved.</p>
-          </div>
+          <p>&copy; {new Date().getFullYear()} QuizAI. Built for smarter assessments.</p>
         </div>
       </footer>
     </div>

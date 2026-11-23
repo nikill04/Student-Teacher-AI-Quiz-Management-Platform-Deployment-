@@ -1,214 +1,118 @@
 import express from 'express';
 import {
-  createBatch,
-  createQuiz,
-  getTeacherQuizzes,
-  getTeacherDashboard,
-  listTeacherBatches,
-  getLeaderboard,
   getTeacherProfile,
+  getTeacherDashboard,
+  createBatch,
+  listTeacherBatches,
+  getTeacherQuizzes,
+  createQuiz,
+  getLeaderboard,
 } from '../controllers/teacherController.js';
-// import { uploadAndGenerateQuiz,publishQuiz } from '../controllers/uploadAndGenerateQuiz.js';
+import { uploadMiddleware, uploadAndGenerateQuiz } from '../controllers/uploadAndGenerateQuiz.js';
 import { verifyToken, requireRole } from '../middleware/auth.js';
 
 const teacherRouter = express.Router();
-import { uploadAndGenerateQuiz,publishQuiz ,uploadMiddleware} from '../controllers/uploadAndGenerateQuiz.js';
 
-teacherRouter.get('/profile', verifyToken, requireRole('teacher'), getTeacherProfile);
-teacherRouter.get('/dashboard', verifyToken, requireRole('teacher'), getTeacherDashboard);
-
-teacherRouter.post('/batch/create', verifyToken, requireRole('teacher'), createBatch);
-teacherRouter.get('/batches', verifyToken, requireRole('teacher'), listTeacherBatches); // optional
-
-teacherRouter.get('/quizzes', verifyToken, requireRole('teacher'), getTeacherQuizzes);
-
-teacherRouter.post('/create-batch', verifyToken, requireRole('teacher'), createBatch);
-teacherRouter.post('/create-quiz', verifyToken, requireRole('teacher'), createQuiz);
-teacherRouter.get('/quiz', verifyToken, requireRole('teacher'), getTeacherQuizzes);
-teacherRouter.get('/leaderboard/:quizId', verifyToken, requireRole('teacher'), getLeaderboard);
-
-teacherRouter.get('/leaderboard', verifyToken,requireRole('teacher'), getLeaderboard);
-
-teacherRouter.post('/upload-and-generate',uploadMiddleware, uploadAndGenerateQuiz);
-teacherRouter.post('/publish-quiz', verifyToken,requireRole('teacher'),publishQuiz);
-
-export default teacherRouter;
-
+// Every route below needs a logged-in TEACHER
+teacherRouter.use(verifyToken, requireRole('teacher'));
 
 /**
  * @swagger
  * tags:
  *   name: Teacher
- *   description: Endpoints for teacher actions
+ *   description: Endpoints for teachers (login as a teacher first)
  */
 
 /**
  * @swagger
  * /teacher/profile:
  *   get:
- *     summary: Get teacher profile
+ *     summary: Teacher profile
  *     tags: [Teacher]
  *     responses:
- *       200:
- *         description: Teacher profile data
- *         content:
- *           application/json:
- *             example:
- *               _id: "64aabb112233"
- *               name: "Jane Doe"
- *               email: "jane@example.com"
- *               role: "teacher"
+ *       200: { description: Profile }
  */
-teacherRouter.get('/profile', verifyToken, requireRole('teacher'), getTeacherProfile);
+teacherRouter.get('/profile', getTeacherProfile);
 
 /**
  * @swagger
  * /teacher/dashboard:
  *   get:
- *     summary: Get teacher dashboard stats
+ *     summary: Dashboard numbers and recent quizzes
  *     tags: [Teacher]
  *     responses:
- *       200:
- *         description: Teacher dashboard data
- *         content:
- *           application/json:
- *             example:
- *               totalBatches: 5
- *               totalQuizzes: 12
- *               totalStudents: 100
+ *       200: { description: Dashboard data }
  */
-teacherRouter.get('/dashboard', verifyToken, requireRole('teacher'), getTeacherDashboard);
+teacherRouter.get('/dashboard', getTeacherDashboard);
 
 /**
  * @swagger
  * /teacher/batch/create:
  *   post:
- *     summary: Create a new batch
+ *     summary: Create a batch
  *     tags: [Teacher]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - name
- *             properties:
- *               name:
- *                 type: string
- *                 description: Name of the batch
- *             example:
- *               name: "Batch A"
+ *           example: { name: "CS-A 2025" }
  *     responses:
- *       200:
- *         description: Batch created successfully
+ *       201: { description: Batch created }
  */
-teacherRouter.post('/batch/create', verifyToken, requireRole('teacher'), createBatch);
-teacherRouter.post('/create-batch', verifyToken, requireRole('teacher'), createBatch);
+teacherRouter.post('/batch/create', createBatch);
+teacherRouter.post('/create-batch', createBatch); // same as above (old URL)
 
 /**
  * @swagger
  * /teacher/batches:
  *   get:
- *     summary: Get all batches for the teacher
+ *     summary: This teacher's batches (with students)
  *     tags: [Teacher]
  *     responses:
- *       200:
- *         description: List of teacher's batches
- *         content:
- *           application/json:
- *             example:
- *               - _id: "64aabb112233"
- *                 name: "Batch A"
- *               - _id: "64aabb112234"
- *                 name: "Batch B"
+ *       200: { description: List of batches }
  */
-teacherRouter.get('/batches', verifyToken, requireRole('teacher'), listTeacherBatches);
+teacherRouter.get('/batches', listTeacherBatches);
 
 /**
  * @swagger
  * /teacher/quizzes:
  *   get:
- *     summary: Get all quizzes created by the teacher
+ *     summary: All quizzes created by this teacher
  *     tags: [Teacher]
  *     responses:
- *       200:
- *         description: List of quizzes
- *         content:
- *           application/json:
- *             example:
- *               - _id: "64bbcc223344"
- *                 title: "Math Quiz 1"
- *                 batch: "Batch A"
- *               - _id: "64bbcc223355"
- *                 title: "Science Quiz 1"
- *                 batch: "Batch B"
+ *       200: { description: List of quizzes }
  */
-teacherRouter.get('/quizzes', verifyToken, requireRole('teacher'), getTeacherQuizzes);
-teacherRouter.get('/quiz', verifyToken, requireRole('teacher'), getTeacherQuizzes);
+teacherRouter.get('/quizzes', getTeacherQuizzes);
 
 /**
  * @swagger
- * /teacher/create-quiz:
+ * /teacher/publish-quiz:
  *   post:
- *     summary: Create a new quiz
+ *     summary: Create / publish a quiz (manual or AI generated)
  *     tags: [Teacher]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - title
- *               - batchId
- *             properties:
- *               title:
- *                 type: string
- *               batchId:
- *                 type: string
- *             example:
+ *           example:
+ *             batchId: "64aabb112233"
+ *             quiz:
  *               title: "Math Quiz 1"
- *               batchId: "64aabb112233"
+ *               deadline: "2030-01-01T10:00"
+ *               duration: 30
+ *               source: "manual"
+ *               questions: [{ question: "2 + 2 = ?", options: ["3", "4", "5", "6"], correct: 1 }]
  *     responses:
- *       200:
- *         description: Quiz created successfully
+ *       201: { description: Quiz created }
  */
-teacherRouter.post('/create-quiz', verifyToken, requireRole('teacher'), createQuiz);
-
-/**
- * @swagger
- * /teacher/leaderboard/{quizId}:
- *   get:
- *     summary: Get leaderboard for a specific quiz
- *     tags: [Teacher]
- *     parameters:
- *       - in: path
- *         name: quizId
- *         required: true
- *         schema:
- *           type: string
- *         description: Quiz ID
- *         example: "64bbcc223344"
- *     responses:
- *       200:
- *         description: Leaderboard data
- *         content:
- *           application/json:
- *             example:
- *               - student: "John Doe"
- *                 score: 90
- *               - student: "Jane Smith"
- *                 score: 85
- */
-teacherRouter.get('/leaderboard/:quizId', verifyToken, requireRole('teacher'), getLeaderboard);
-teacherRouter.get('/leaderboard', verifyToken, requireRole('teacher'), getLeaderboard);
+teacherRouter.post('/publish-quiz', createQuiz);
+teacherRouter.post('/create-quiz', createQuiz); // same as above (old URL)
 
 /**
  * @swagger
  * /teacher/upload-and-generate:
  *   post:
- *     summary: Upload a file to generate quiz
+ *     summary: Upload a PDF and let AI generate questions (preview, not saved)
  *     tags: [Teacher]
  *     requestBody:
  *       required: true
@@ -217,42 +121,24 @@ teacherRouter.get('/leaderboard', verifyToken, requireRole('teacher'), getLeader
  *           schema:
  *             type: object
  *             properties:
- *               file:
- *                 type: string
- *                 format: binary
+ *               file: { type: string, format: binary }
  *     responses:
- *       200:
- *         description: Quiz generated successfully
+ *       200: { description: Generated questions }
  */
 teacherRouter.post('/upload-and-generate', uploadMiddleware, uploadAndGenerateQuiz);
 
 /**
  * @swagger
- * /teacher/publish-quiz:
- *   post:
- *     summary: Publish a quiz
+ * /teacher/leaderboard:
+ *   get:
+ *     summary: Leaderboard (optional filters batchId and quizId)
  *     tags: [Teacher]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - quizId
- *             properties:
- *               quizId:
- *                 type: string
- *                 description: ID of the quiz to publish
- *             example:
- *               quizId: "64bbcc223344"
+ *     parameters:
+ *       - { in: query, name: batchId, schema: { type: string } }
+ *       - { in: query, name: quizId, schema: { type: string } }
  *     responses:
- *       200:
- *         description: Quiz published successfully
+ *       200: { description: Leaderboard rows and filter options }
  */
-teacherRouter.post('/publish-quiz', verifyToken, requireRole('teacher'), publishQuiz);
+teacherRouter.get('/leaderboard', getLeaderboard);
 
-
-
-
-
+export default teacherRouter;

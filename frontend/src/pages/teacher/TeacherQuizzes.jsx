@@ -1,71 +1,77 @@
-import React, { useEffect, useState } from 'react';
-import axios from '../../api/axios'; // axios instance with withCredentials
+import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { FileText, PlusCircle } from 'lucide-react';
 import TeacherLayout from '../../components/TeacherLayout';
+import { Page, PageHeader, Loading, Alert, EmptyState, formatDate } from '../../components/ui';
+import axios, { getErrorMessage } from '../../api/axios';
 
 const TeacherQuizzes = () => {
-  const [quizzes, setQuizzes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const location = useLocation(); // may contain a "Quiz published!" message
+  const [quizzes, setQuizzes] = useState(null); // null = still loading
   const [error, setError] = useState('');
 
   useEffect(() => {
-  const fetchQuizzes = async () => {
-    try {
-      const res = await axios.get('/teacher/quizzes'); // ✅ correct path
-      setQuizzes(res.data.quizzes || []);
-      setLoading(false);
-    } catch (err) {
-      console.error('Error fetching quizzes:', err.response?.data || err.message);
-      setError('Failed to load quizzes');
-      setLoading(false);
-    }
-  };
+    axios
+      .get('/teacher/quizzes')
+      .then((res) => setQuizzes(res.data.quizzes))
+      .catch((err) => {
+        setQuizzes([]);
+        setError(getErrorMessage(err, 'Failed to load quizzes'));
+      });
+  }, []);
 
-  fetchQuizzes();
-}, []);
-
+  const isOverdue = (deadline) => deadline && new Date(deadline) < new Date();
 
   return (
     <TeacherLayout>
-      <div className="p-6 max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6 text-gray-900">My Quizzes</h1>
+      <Page>
+        <PageHeader title="My Quizzes" subtitle="All quizzes you have published.">
+          <Link to="/teacher/manual-create" className="btn-primary">
+            <PlusCircle className="h-4 w-4" /> New Quiz
+          </Link>
+        </PageHeader>
+        <Alert type="success" message={location.state?.message} />
+        <Alert message={error} />
 
-        {loading ? (
-          <p className="text-gray-600">Loading quizzes...</p>
-        ) : error ? (
-          <p className="text-red-600">{error}</p>
+        {quizzes === null ? (
+          <Loading />
         ) : quizzes.length === 0 ? (
-          <p className="text-gray-500">No quizzes created yet.</p>
+          <EmptyState icon={FileText} title="No quizzes yet" text="Create a quiz manually or generate one from a PDF." />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white rounded-xl shadow border border-gray-200">
+          <div className="card overflow-x-auto">
+            <table className="table">
               <thead>
-                <tr className="bg-gray-100 text-gray-700 text-sm uppercase">
-                  <th className="px-6 py-3 text-left">Title</th>
-                  <th className="px-6 py-3 text-left">Batch</th>
-                  <th className="px-6 py-3 text-left">Deadline</th>
-                  <th className="px-6 py-3 text-left">Questions</th>
-                  <th className="px-6 py-3 text-left">Source</th>
+                <tr>
+                  <th>Title</th>
+                  <th>Batch</th>
+                  <th>Questions</th>
+                  <th>Deadline</th>
+                  <th>Source</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
                 {quizzes.map((quiz) => (
-                  <tr key={quiz._id} className="border-t text-gray-700 hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium">{quiz.title}</td>
-                    <td className="px-6 py-4">{quiz.batch?.name || 'N/A'}</td>
-                    <td className="px-6 py-4">
-                      {quiz.deadline
-                        ? new Date(quiz.deadline).toLocaleString()
-                        : 'No deadline'}
+                  <tr key={quiz._id} className="hover:bg-slate-50">
+                    <td className="font-medium text-slate-900">{quiz.title}</td>
+                    <td>{quiz.batch?.name || 'N/A'}</td>
+                    <td>{quiz.questions.length}</td>
+                    <td>
+                      <span className={isOverdue(quiz.deadline) ? 'text-red-600' : ''}>{formatDate(quiz.deadline)}</span>
                     </td>
-                    <td className="px-6 py-4">{quiz.questions?.length || 0}</td>
-                    <td className="px-6 py-4 capitalize">{quiz.source}</td>
+                    <td><span className={quiz.source === 'ai' ? 'badge-blue' : 'badge-gray'}>{quiz.source === 'ai' ? 'AI' : 'Manual'}</span></td>
+                    <td className="text-right">
+                      <Link to={`/teacher/leaderboard?quizId=${quiz._id}`} className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">
+                        Results
+                      </Link>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
-      </div>
+      </Page>
     </TeacherLayout>
   );
 };

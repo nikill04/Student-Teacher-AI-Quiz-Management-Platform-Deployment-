@@ -1,211 +1,125 @@
-import React, { useState, useEffect, useRef } from 'react';
-import StudentLayout from '../../components/StudentLayout';
+import { useState, useEffect, useRef } from 'react';
 import { Send, Bot, User, Lightbulb } from 'lucide-react';
-import axios from '../../api/axios'; // ✅ Custom axios instance
+import StudentLayout from '../../components/StudentLayout';
+import axios, { getErrorMessage } from '../../api/axios';
+
+const suggestedQuestions = [
+  'Explain the quadratic formula',
+  'What are the laws of motion?',
+  'What is photosynthesis?',
+  'Explain the Pythagorean theorem',
+];
+
+const welcomeMessage = {
+  id: 1,
+  type: 'ai',
+  content: "Hi! I'm your AI tutor. Ask me anything about your studies.",
+};
 
 const StudentAskAI = () => {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      type: 'ai',
-      content:
-        "Hello! I'm your AI tutor. I'm here to help you with any questions about your studies. What would you like to know?",
-      timestamp: new Date().toLocaleTimeString()
-    }
-  ]);
-  const [inputValue, setInputValue] = useState('');
+  const [messages, setMessages] = useState([welcomeMessage]);
+  const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const bottomRef = useRef(null);
 
-  // ✅ AUTO SCROLL REF
-  const messagesEndRef = useRef(null);
-
-  // ✅ AUTO SCROLL EFFECT
+  // Scroll to the newest message
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  const suggestedQuestions = [
-    'Explain the quadratic formula',
-    'What are the laws of motion?',
-    'How do acids and bases react?',
-    'What is photosynthesis?',
-    'Explain the Pythagorean theorem'
-  ];
+  const addMessage = (type, content) =>
+    setMessages((prev) => [...prev, { id: Date.now() + Math.random(), type, content }]);
 
-  const handleSend = async () => {
-    if (!inputValue.trim()) return;
+  const sendQuestion = async (question) => {
+    if (!question.trim() || isLoading) return;
 
-    const userMessage = {
-      id: Date.now(),
-      type: 'user',
-      content: inputValue,
-      timestamp: new Date().toLocaleTimeString()
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInputValue('');
+    addMessage('user', question);
+    setInput('');
     setIsLoading(true);
 
     try {
-      const res = await axios.post('/ai/ask-question', {
-        question: inputValue
-      });
-
-      const aiResponse = {
-        id: Date.now() + 1,
-        type: 'ai',
-        content: res.data.answer,
-        timestamp: new Date().toLocaleTimeString()
-      };
-
-      setMessages((prev) => [...prev, aiResponse]);
+      const res = await axios.post('/ai/ask-question', { question });
+      addMessage('ai', res.data.answer);
     } catch (err) {
-      console.error(err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 2,
-          type: 'ai',
-          content: "Sorry, I couldn't process that question. Please try again.",
-          timestamp: new Date().toLocaleTimeString()
-        }
-      ]);
+      addMessage('error', getErrorMessage(err, "Sorry, I couldn't answer that. Please try again."));
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSuggestedQuestion = (question) => {
-    setInputValue(question);
-  };
-
-  const handleKeyPress = (e) => {
+  // Enter = send, Shift+Enter = new line
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      sendQuestion(input);
     }
   };
 
   return (
     <StudentLayout>
-      <div className="h-screen flex flex-col">
-        {/* Header */}
-        <div className="bg-white shadow-sm border-b border-gray-200 p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Ask AI Tutor</h1>
-          <p className="text-gray-600">
-            Get instant help with your studies from our AI tutor
-          </p>
+      {/* Full-height chat: header, messages (scroll), input */}
+      <div className="flex h-[calc(100vh-57px)] flex-col lg:h-screen">
+        <div className="border-b border-slate-200 bg-white px-6 py-4">
+          <h1 className="text-xl font-bold text-slate-900">Ask AI Tutor</h1>
+          <p className="text-sm text-slate-500">Get simple explanations for any study question.</p>
         </div>
 
-        {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-3xl flex ${
-                  message.type === 'user' ? 'flex-row-reverse' : 'flex-row'
-                }`}
-              >
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    message.type === 'user' ? 'bg-teal-600 ml-3' : 'bg-blue-600 mr-3'
-                  }`}
-                >
-                  {message.type === 'user' ? (
-                    <User className="h-5 w-5 text-white" />
-                  ) : (
-                    <Bot className="h-5 w-5 text-white" />
-                  )}
+        {/* Messages */}
+        <div className="flex-1 space-y-4 overflow-y-auto px-4 py-6 sm:px-6">
+          {messages.map((message) => {
+            const isUser = message.type === 'user';
+            return (
+              <div key={message.id} className={`flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
+                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isUser ? 'bg-slate-700' : 'bg-indigo-600'}`}>
+                  {isUser ? <User className="h-4 w-4 text-white" /> : <Bot className="h-4 w-4 text-white" />}
                 </div>
-                <div
-                  className={`rounded-2xl px-4 py-3 ${
-                    message.type === 'user'
-                      ? 'bg-teal-600 text-white'
-                      : 'bg-white border border-gray-200 text-gray-900'
-                  }`}
-                >
-                  <p className="text-sm leading-relaxed">{message.content}</p>
-                  <p
-                    className={`text-xs mt-2 ${
-                      message.type === 'user' ? 'text-teal-100' : 'text-gray-500'
-                    }`}
-                  >
-                    {message.timestamp}
-                  </p>
+                <div className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed sm:max-w-2xl ${
+                  isUser ? 'bg-indigo-600 text-white'
+                    : message.type === 'error' ? 'border border-red-200 bg-red-50 text-red-700'
+                    : 'border border-slate-200 bg-white text-slate-800'
+                }`}>
+                  {message.content}
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
-          {/* AI Typing Loader */}
           {isLoading && (
-            <div className="flex justify-start">
-              <div className="max-w-3xl flex flex-row">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-blue-600 mr-3">
-                  <Bot className="h-5 w-5 text-white" />
-                </div>
-                <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3">
-                  <div className="flex space-x-2">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div
-                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                      style={{ animationDelay: '0.1s' }}
-                    ></div>
-                    <div
-                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                      style={{ animationDelay: '0.2s' }}
-                    ></div>
-                  </div>
-                </div>
+            <div className="flex gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600">
+                <Bot className="h-4 w-4 text-white" />
+              </div>
+              <div className="flex gap-1.5 rounded-2xl border border-slate-200 bg-white px-4 py-4">
+                <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400" />
+                <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:0.1s]" />
+                <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:0.2s]" />
               </div>
             </div>
           )}
-
-          {/* ✅ AUTO SCROLL ANCHOR */}
-          <div ref={messagesEndRef} />
+          <div ref={bottomRef} />
         </div>
 
-        {/* Suggested Questions */}
-        <div className="bg-gray-50 border-t border-gray-200 p-4">
-          <div className="flex items-center space-x-2 mb-3">
-            <Lightbulb className="h-5 w-5 text-yellow-600" />
-            <span className="text-sm font-medium text-gray-700">
-              Suggested Questions:
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {suggestedQuestions.map((question, index) => (
-              <button
-                key={index}
-                onClick={() => handleSuggestedQuestion(question)}
-                className="bg-white text-gray-700 px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-sm"
-              >
+        {/* Suggestions + input */}
+        <div className="border-t border-slate-200 bg-white p-4">
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <Lightbulb className="h-4 w-4 text-amber-500" />
+            {suggestedQuestions.map((question) => (
+              <button key={question} onClick={() => sendQuestion(question)} disabled={isLoading}
+                className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-50">
                 {question}
               </button>
             ))}
           </div>
-        </div>
-
-        {/* Input Area */}
-        <div className="bg-white border-t border-gray-200 p-4">
-          <div className="flex space-x-4">
+          <div className="flex gap-3">
             <textarea
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type your question here..."
-              className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
-              rows="1"
-              style={{ minHeight: '44px' }}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Type your question and press Enter..."
+              className="input resize-none"
+              rows={1}
             />
-            <button
-              onClick={handleSend}
-              disabled={!inputValue.trim() || isLoading}
-              className="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-            >
+            <button onClick={() => sendQuestion(input)} disabled={!input.trim() || isLoading} className="btn-primary px-4" aria-label="Send">
               <Send className="h-5 w-5" />
             </button>
           </div>

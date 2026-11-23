@@ -1,45 +1,48 @@
 /**
- * AXIOS CONFIGURATION
- * This creates a custom axios instance for all API calls
- * 
- * WHY CUSTOM INSTANCE?
- * - Sets baseURL once (no need to repeat in every request)
- * - Automatically includes cookies (withCredentials: true)
- * - Consistent configuration across all API calls
- * 
- * HOW COOKIES WORK:
- * 1. Backend sends Set-Cookie header with JWT token
- * 2. Browser stores cookie automatically
- * 3. withCredentials: true tells axios to include cookies in requests
- * 4. Browser automatically attaches cookie to every request
- * 5. Backend reads cookie via req.cookies.token
- * 
- * IMPORTANT: This only works because:
- * - Backend CORS has credentials: true
- * - Frontend axios has withCredentials: true
- * - Cookie has sameSite: 'None' (allows cross-origin)
+ * AXIOS SETUP
+ * One axios instance for every API call in the app.
+ *
+ * - baseURL: the backend address (set VITE_API_URL in frontend/.env for production)
+ * - withCredentials: true -> the browser sends the login cookie with every request
  */
+import axios from 'axios';
 
-import axios from "axios";
-
-// const instance = axios.create({
-//   // Automatically prepends this to all requests
-//   // Example: axios.get('/auth/login') → http://localhost:5000/api/auth/login
-//   baseURL: import.meta.env.MODE==="development"
-//     ?"http://localhost:5000/api"
-//     :"https://quizapp-backend-frj2.onrender.com/api",
-    
-//   // ✅ CRITICAL: Allow cookies to be sent with requests
-//   withCredentials: true,
-// });
+// Backend address:
+// 1. VITE_API_URL if it is set (frontend/.env or Render "Environment")
+// 2. otherwise: the deployed backend for production builds, localhost for "npm run dev"
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD
+    ? 'https://student-teacher-ai-quiz-management.onrender.com/api'
+    : 'http://localhost:5001/api');
 
 const instance = axios.create({
-  // In development: uses localhost
-  // In production build: uses VITE_API_URL env var set at build time
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
-  
-  // ✅ CRITICAL: Allow cookies to be sent with requests
+  baseURL: API_URL,
   withCredentials: true,
 });
+
+// If the login session expired (401), go back to the login page.
+// (Skip /auth/ calls: a wrong password on the login page also returns 401.)
+instance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const isAuthCall = error.config?.url?.startsWith('/auth/');
+    if (error.response?.status === 401 && !isAuthCall && window.location.pathname !== '/login') {
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+/**
+ * Turns any API error into a message we can show to the user.
+ * Usage: catch (err) { setError(getErrorMessage(err)) }
+ */
+export function getErrorMessage(err, fallback = 'Something went wrong. Please try again.') {
+  if (!err.response) {
+    return 'Cannot reach the server. Is the backend running?';
+  }
+  return err.response.data?.error || err.response.data?.message || fallback;
+}
 
 export default instance;
