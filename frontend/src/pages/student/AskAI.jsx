@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Bot, User } from 'lucide-react';
+import { Send, Bot, User, Lightbulb } from 'lucide-react';
 import StudentLayout from '../../components/StudentLayout';
 import axios, { getErrorMessage } from '../../api/axios';
 
@@ -13,7 +13,7 @@ const suggestedQuestions = [
 const welcomeMessage = {
   id: 1,
   type: 'ai',
-  content: 'Hi! Ask me about anything you are studying, and I will explain it simply.',
+  content: "Hi! I'm your AI tutor. Ask me anything about your studies.",
 };
 
 const StudentAskAI = () => {
@@ -59,9 +59,9 @@ const StudentAskAI = () => {
     <StudentLayout>
       {/* Full-height chat: header, messages (scroll), input */}
       <div className="flex h-[calc(100vh-57px)] flex-col lg:h-screen">
-        <div className="border-b border-stone-200 bg-white px-6 py-4">
-          <h1 className="text-2xl font-semibold text-stone-900">Ask AI Tutor</h1>
-          <p className="text-sm text-stone-500">Stuck on something? Ask it the way you would ask a friend.</p>
+        <div className="border-b border-slate-200 bg-white px-6 py-4">
+          <h1 className="text-xl font-bold text-slate-900">Ask AI Tutor</h1>
+          <p className="text-sm text-slate-500">Get simple explanations for any study question.</p>
         </div>
 
         {/* Messages */}
@@ -70,13 +70,13 @@ const StudentAskAI = () => {
             const isUser = message.type === 'user';
             return (
               <div key={message.id} className={`flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
-                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isUser ? 'bg-stone-700' : 'bg-brand-600'}`}>
+                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isUser ? 'bg-slate-700' : 'bg-indigo-600'}`}>
                   {isUser ? <User className="h-4 w-4 text-white" /> : <Bot className="h-4 w-4 text-white" />}
                 </div>
-                <div className={`max-w-[85%] whitespace-pre-wrap rounded-lg px-4 py-3 text-sm leading-relaxed sm:max-w-2xl ${
-                  isUser ? 'bg-stone-900 text-white'
+                <div className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed sm:max-w-2xl ${
+                  isUser ? 'bg-indigo-600 text-white'
                     : message.type === 'error' ? 'border border-red-200 bg-red-50 text-red-700'
-                    : 'border border-stone-200 bg-white text-stone-800'
+                    : 'border border-slate-200 bg-white text-slate-800'
                 }`}>
                   {message.content}
                 </div>
@@ -86,13 +86,13 @@ const StudentAskAI = () => {
 
           {isLoading && (
             <div className="flex gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-600">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600">
                 <Bot className="h-4 w-4 text-white" />
               </div>
-              <div className="flex gap-1.5 rounded-lg border border-stone-200 bg-white px-4 py-4">
-                <span className="h-2 w-2 animate-bounce rounded-full bg-stone-400" />
-                <span className="h-2 w-2 animate-bounce rounded-full bg-stone-400 [animation-delay:0.1s]" />
-                <span className="h-2 w-2 animate-bounce rounded-full bg-stone-400 [animation-delay:0.2s]" />
+              <div className="flex gap-1.5 rounded-2xl border border-slate-200 bg-white px-4 py-4">
+                <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400" />
+                <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:0.1s]" />
+                <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:0.2s]" />
               </div>
             </div>
           )}
@@ -100,12 +100,12 @@ const StudentAskAI = () => {
         </div>
 
         {/* Suggestions + input */}
-        <div className="border-t border-stone-200 bg-white p-4">
+        <div className="border-t border-slate-200 bg-white p-4">
           <div className="mb-3 flex flex-wrap items-center gap-2">
-            <span className="text-xs text-stone-500">Try:</span>
+            <Lightbulb className="h-4 w-4 text-amber-500" />
             {suggestedQuestions.map((question) => (
               <button key={question} onClick={() => sendQuestion(question)} disabled={isLoading}
-                className="rounded-md border border-stone-300 px-2.5 py-1 text-xs text-stone-600 hover:bg-stone-50 disabled:opacity-50">
+                className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-50">
                 {question}
               </button>
             ))}

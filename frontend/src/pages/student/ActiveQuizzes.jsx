@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import { Rocket } from 'lucide-react';
 import StudentLayout from '../../components/StudentLayout';
 import QuizCard from '../../components/QuizCard';
 import { Page, PageHeader, Loading, Alert, EmptyState } from '../../components/ui';
@@ -29,7 +29,7 @@ const ActiveQuizzes = () => {
         {quizzes === null ? (
           <Loading />
         ) : quizzes.length === 0 ? (
-          <EmptyState icon={CheckCircle2} title="You're all caught up!" text="Nothing is due right now. New quizzes from your teachers will show up here." />
+          <EmptyState icon={Rocket} title="You're all caught up!" text="There are no quizzes waiting for you right now." />
         ) : (
           <div className="space-y-3">
             {quizzes.map((quiz) => <QuizCard key={quiz._id} quiz={quiz} />)}

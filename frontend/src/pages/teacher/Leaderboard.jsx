@@ -5,7 +5,7 @@ import TeacherLayout from '../../components/TeacherLayout';
 import { Page, PageHeader, Loading, Alert, EmptyState, formatDate } from '../../components/ui';
 import axios, { getErrorMessage } from '../../api/axios';
 
-const medalColors = ['text-yellow-500', 'text-stone-400', 'text-amber-700'];
+const medalColors = ['text-yellow-500', 'text-slate-400', 'text-amber-700'];
 
 const TeacherLeaderboard = () => {
   // "?quizId=..." in the URL pre-selects a quiz (used by "View results" links)
@@ -109,8 +109,8 @@ const TeacherLeaderboard = () => {
                       </div>
                     </td>
                     <td>
-                      <p className="font-medium text-stone-900">{row.name}</p>
-                      <p className="text-xs text-stone-500">{row.email}</p>
+                      <p className="font-medium text-slate-900">{row.name}</p>
+                      <p className="text-xs text-slate-500">{row.email}</p>
                     </td>
                     <td>{row.quizTitle}</td>
                     <td>

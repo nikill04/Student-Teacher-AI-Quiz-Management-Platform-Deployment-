@@ -88,7 +88,7 @@ const JoinBatch = () => {
         </form>
 
         {/* Joined batches */}
-        <h2 className="mb-3 text-lg font-semibold text-stone-900">Your batches</h2>
+        <h2 className="mb-3 text-lg font-semibold text-slate-900">Your batches</h2>
         {myBatches === null ? (
           <Loading />
         ) : myBatches.length === 0 ? (
@@ -98,8 +98,8 @@ const JoinBatch = () => {
             {myBatches.map((batch) => (
               <li key={batch._id} className="card flex items-center justify-between p-4">
                 <div className="flex items-center gap-3">
-                  <Users className="h-5 w-5 shrink-0 text-stone-400" />
-                  <span className="font-medium text-stone-900">{batch.name}</span>
+                  <div className="rounded-lg bg-indigo-50 p-2"><Users className="h-5 w-5 text-indigo-600" /></div>
+                  <span className="font-medium text-slate-900">{batch.name}</span>
                 </div>
                 <button onClick={() => handleLeave(batch)} className="btn-danger px-3 py-1.5">
                   <LogOut className="h-4 w-4" /> Leave

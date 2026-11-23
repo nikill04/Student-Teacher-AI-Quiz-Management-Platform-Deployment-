@@ -1,11 +1,11 @@
-import { LayoutDashboard, MessageCircle, ClipboardList, ListChecks, Users } from 'lucide-react';
+import { LayoutDashboard, MessageCircle, Trophy, Users, Rocket } from 'lucide-react';
 import AppLayout from './AppLayout';
 
 // Sidebar links for students
 const navigation = [
   { name: 'Dashboard', href: '/student/dashboard', icon: LayoutDashboard },
-  { name: 'Active Quizzes', href: '/student/active-quizzes', icon: ClipboardList },
-  { name: 'My Results', href: '/student/my-results', icon: ListChecks },
+  { name: 'Active Quizzes', href: '/student/active-quizzes', icon: Rocket },
+  { name: 'My Results', href: '/student/my-results', icon: Trophy },
   { name: 'Batches', href: '/student/join-batch', icon: Users },
   { name: 'Ask AI', href: '/student/ask-ai', icon: MessageCircle },
 ];

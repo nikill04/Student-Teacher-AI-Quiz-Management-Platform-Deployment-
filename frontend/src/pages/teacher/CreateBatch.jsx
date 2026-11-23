@@ -62,7 +62,7 @@ const CreateBatch = () => {
         </form>
 
         {/* List of batches */}
-        <h2 className="mb-3 text-lg font-semibold text-stone-900">Your batches</h2>
+        <h2 className="mb-3 text-lg font-semibold text-slate-900">Your batches</h2>
         {batches === null ? (
           <Loading />
         ) : batches.length === 0 ? (
@@ -72,17 +72,17 @@ const CreateBatch = () => {
             {batches.map((batch) => (
               <div key={batch._id} className="card p-5">
                 <div className="mb-3 flex items-center justify-between">
-                  <h3 className="font-semibold text-stone-900">{batch.name}</h3>
+                  <h3 className="font-semibold text-slate-900">{batch.name}</h3>
                   <span className="badge-blue">{batch.students.length} students</span>
                 </div>
                 {batch.students.length === 0 ? (
-                  <p className="text-sm text-stone-500">No students have joined yet.</p>
+                  <p className="text-sm text-slate-500">No students have joined yet.</p>
                 ) : (
                   <ul className="max-h-40 space-y-1 overflow-y-auto text-sm">
                     {batch.students.map((student) => (
-                      <li key={student._id} className="flex justify-between gap-2 text-stone-600">
-                        <span className="font-medium text-stone-800">{student.name}</span>
-                        <span className="truncate text-stone-400">{student.email}</span>
+                      <li key={student._id} className="flex justify-between gap-2 text-slate-600">
+                        <span className="font-medium text-slate-800">{student.name}</span>
+                        <span className="truncate text-slate-400">{student.email}</span>
                       </li>
                     ))}
                   </ul>

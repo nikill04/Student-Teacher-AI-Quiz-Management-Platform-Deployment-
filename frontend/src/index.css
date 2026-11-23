@@ -6,52 +6,45 @@
   Reusable style classes used across the app.
   Instead of repeating long Tailwind class lists everywhere, pages use:
     className="btn-primary"   className="card"   className="input"   ...
-
-  Look: warm paper background, dark ink text, one green accent (brand-*),
-  serif headings, thin borders instead of shadows.
 */
 @layer base {
   body {
-    @apply bg-paper text-stone-800 antialiased;
-  }
-  h1, h2 {
-    @apply font-serif tracking-tight;
+    @apply bg-slate-50 text-slate-800 antialiased;
   }
 }
 
 @layer components {
   /* ---------- Buttons ---------- */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold
            transition-colors disabled:cursor-not-allowed disabled:opacity-50;
   }
-  .btn-primary   { @apply btn bg-brand-600 text-white hover:bg-brand-700; }
-  .btn-secondary { @apply btn border border-stone-300 bg-white text-stone-800 hover:border-stone-400 hover:bg-stone-50; }
-  .btn-success   { @apply btn bg-stone-900 text-white hover:bg-stone-700; } /* submit / publish */
-  .btn-danger    { @apply btn border border-red-200 bg-white text-red-700 hover:bg-red-50; }
+  .btn-primary   { @apply btn bg-indigo-600 text-white shadow-sm hover:bg-indigo-700; }
+  .btn-secondary { @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50; }
+  .btn-success   { @apply btn bg-emerald-600 text-white shadow-sm hover:bg-emerald-700; }
+  .btn-danger    { @apply btn border border-red-200 bg-white text-red-600 hover:bg-red-50; }
 
   /* ---------- Cards and text ---------- */
-  .card          { @apply rounded-lg border border-stone-200 bg-white; }
-  .page-title    { @apply font-serif text-3xl font-semibold text-stone-900; }
-  .page-subtitle { @apply mt-1 text-stone-500; }
-  .link          { @apply font-medium text-brand-700 underline decoration-brand-200 underline-offset-4 hover:decoration-brand-600; }
+  .card       { @apply rounded-2xl border border-slate-200 bg-white shadow-sm; }
+  .page-title { @apply text-2xl font-bold text-slate-900 sm:text-3xl; }
+  .page-subtitle { @apply mt-1 text-slate-500; }
 
   /* ---------- Forms ---------- */
-  .label { @apply mb-1.5 block text-sm font-medium text-stone-700; }
+  .label { @apply mb-1.5 block text-sm font-medium text-slate-700; }
   .input {
-    @apply w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900
-           placeholder:text-stone-400 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/15;
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900
+           placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20;
   }
 
   /* ---------- Small coloured labels ---------- */
-  .badge       { @apply inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium; }
-  .badge-green { @apply badge bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-100; }
-  .badge-blue  { @apply badge bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-200; } /* "open / to do" */
-  .badge-red   { @apply badge bg-red-50 text-red-700 ring-1 ring-inset ring-red-100; }
-  .badge-gray  { @apply badge bg-stone-100 text-stone-600 ring-1 ring-inset ring-stone-200; }
+  .badge       { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold; }
+  .badge-green { @apply badge bg-emerald-100 text-emerald-700; }
+  .badge-blue  { @apply badge bg-indigo-100 text-indigo-700; }
+  .badge-red   { @apply badge bg-red-100 text-red-700; }
+  .badge-gray  { @apply badge bg-slate-100 text-slate-600; }
 
   /* ---------- Tables ---------- */
   .table    { @apply w-full text-left text-sm; }
-  .table th { @apply border-b border-stone-200 px-4 py-2.5 text-xs font-medium text-stone-500; }
-  .table td { @apply border-t border-stone-100 px-4 py-3 text-stone-700; }
+  .table th { @apply bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500; }
+  .table td { @apply border-t border-slate-100 px-4 py-3 text-slate-700; }
 }

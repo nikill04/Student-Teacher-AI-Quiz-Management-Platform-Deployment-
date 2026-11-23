@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Users, Trophy, Award, Target, BookOpen } from 'lucide-react';
 import StudentLayout from '../../components/StudentLayout';
 import QuizCard from '../../components/QuizCard';
-import { Page, PageHeader, Loading, Alert, EmptyState, StatCard, greeting } from '../../components/ui';
+import { Page, PageHeader, Loading, Alert, EmptyState, StatCard } from '../../components/ui';
 import axios, { getErrorMessage } from '../../api/axios';
 
 const StudentDashboard = () => {
@@ -51,14 +51,14 @@ const StudentDashboard = () => {
           <Loading text="Loading your dashboard..." />
         ) : (
           <>
-            <PageHeader title={`${greeting()}, ${student?.name?.split(' ')[0] || 'there'}`} subtitle="Here are your batches and quizzes." />
+            <PageHeader title={`Welcome, ${student?.name || 'Student'}!`} subtitle="Your batches and quizzes at a glance." />
             <Alert message={error} />
 
             <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StatCard icon={Users} label="Batches Joined" value={student?.batches.length ?? 0} />
-              <StatCard icon={Target} label="Quizzes To Do" value={activeCount} />
-              <StatCard icon={Award} label="Completed" value={completed.length} />
-              <StatCard icon={Trophy} label="Average Score" value={averageScore} />
+              <StatCard icon={Target} label="Quizzes To Do" value={activeCount} color="amber" />
+              <StatCard icon={Award} label="Completed" value={completed.length} color="emerald" />
+              <StatCard icon={Trophy} label="Average Score" value={averageScore} color="rose" />
             </div>
 
             {student && batches.length === 0 && (
@@ -70,7 +70,7 @@ const StudentDashboard = () => {
 
             {batches.map((batch) => (
               <section key={batch._id} className="mb-8">
-                <h2 className="mb-3 text-xl font-semibold text-stone-900">{batch.name}</h2>
+                <h2 className="mb-3 text-lg font-semibold text-slate-900">{batch.name}</h2>
                 {batch.quizzes.length === 0 ? (
                   <EmptyState icon={BookOpen} title="No quizzes yet" text="Your teacher hasn't published a quiz for this batch." />
                 ) : (

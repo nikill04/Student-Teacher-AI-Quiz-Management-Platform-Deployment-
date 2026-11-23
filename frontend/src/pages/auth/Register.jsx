@@ -55,11 +55,11 @@ const Register = () => {
   return (
     <AuthCard
       title="Create your account"
-      subtitle="It takes less than a minute."
+      subtitle="Join QuizAI as a student or a teacher"
       footer={
         <>
           Already have an account?{' '}
-          <Link to="/login" className="link">Sign in here</Link>
+          <Link to="/login" className="font-semibold text-indigo-600 hover:text-indigo-500">Sign in here</Link>
         </>
       }
     >
@@ -75,10 +75,10 @@ const Register = () => {
                 key={role.value}
                 type="button"
                 onClick={() => setFormData({ ...formData, role: role.value })}
-                className={`flex items-center justify-center gap-2 rounded-md border p-3 text-sm font-medium transition-colors ${
+                className={`flex items-center justify-center gap-2 rounded-lg border-2 p-3 text-sm font-semibold transition-colors ${
                   formData.role === role.value
-                    ? 'border-brand-600 bg-brand-50 text-brand-800 ring-1 ring-brand-600'
-                    : 'border-stone-300 text-stone-600 hover:border-stone-400'
+                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                    : 'border-slate-200 text-slate-600 hover:border-slate-300'
                 }`}
               >
                 <role.icon className="h-5 w-5" />

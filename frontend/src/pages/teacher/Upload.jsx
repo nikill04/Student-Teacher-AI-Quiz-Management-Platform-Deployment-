@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, FileText, Wand2, Loader2, Trash2, RotateCcw, Send } from 'lucide-react';
+import { Upload, FileText, Brain, Loader2, Trash2, RotateCcw, Send } from 'lucide-react';
 import TeacherLayout from '../../components/TeacherLayout';
 import QuizDetailsFields from '../../components/QuizDetailsFields';
 import { Page, PageHeader, Alert } from '../../components/ui';
@@ -99,33 +99,33 @@ const TeacherUpload = () => {
           /* ---------- STEP 1: upload form ---------- */
           <form onSubmit={generateQuiz} className="space-y-6">
             <div className="card p-6">
-              <h2 className="mb-4 font-semibold text-stone-900">1. Quiz details</h2>
+              <h2 className="mb-4 font-semibold text-slate-900">1. Quiz details</h2>
               <QuizDetailsFields details={details} onChange={setDetails} batches={batches} />
             </div>
 
             <div className="card p-6">
-              <h2 className="mb-4 font-semibold text-stone-900">2. Study material (PDF)</h2>
+              <h2 className="mb-4 font-semibold text-slate-900">2. Study material (PDF)</h2>
               <label
                 htmlFor="file-upload"
                 onDragEnter={handleDrag}
                 onDragOver={handleDrag}
                 onDragLeave={handleDrag}
                 onDrop={handleDrop}
-                className={`flex cursor-pointer flex-col items-center rounded-lg border-2 border-dashed p-8 text-center transition-colors ${
-                  dragActive ? 'border-brand-500 bg-brand-50' : 'border-stone-300 hover:border-brand-400 hover:bg-stone-50'
+                className={`flex cursor-pointer flex-col items-center rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
+                  dragActive ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'
                 }`}
               >
                 {file ? (
                   <>
-                    <FileText className="mb-2 h-10 w-10 text-brand-600" />
-                    <p className="font-semibold text-stone-900">{file.name}</p>
-                    <p className="text-sm text-stone-500">{(file.size / 1024 / 1024).toFixed(2)} MB - click to change</p>
+                    <FileText className="mb-2 h-10 w-10 text-indigo-600" />
+                    <p className="font-semibold text-slate-900">{file.name}</p>
+                    <p className="text-sm text-slate-500">{(file.size / 1024 / 1024).toFixed(2)} MB - click to change</p>
                   </>
                 ) : (
                   <>
-                    <Upload className="mb-2 h-10 w-10 text-stone-400" />
-                    <p className="font-semibold text-stone-900">Drag a PDF here or click to choose</p>
-                    <p className="text-sm text-stone-500">Text PDFs only, max 10 MB</p>
+                    <Upload className="mb-2 h-10 w-10 text-slate-400" />
+                    <p className="font-semibold text-slate-900">Drag a PDF here or click to choose</p>
+                    <p className="text-sm text-slate-500">Text PDFs only, max 10 MB</p>
                   </>
                 )}
               </label>
@@ -137,7 +137,7 @@ const TeacherUpload = () => {
               {generating ? (
                 <><Loader2 className="h-5 w-5 animate-spin" /> Generating questions... (this can take ~10 seconds)</>
               ) : (
-                <><Wand2 className="h-4 w-4" /> Generate Quiz with AI</>
+                <><Brain className="h-5 w-5" /> Generate Quiz with AI</>
               )}
             </button>
           </form>
@@ -146,8 +146,8 @@ const TeacherUpload = () => {
           <div className="space-y-4">
             <div className="card flex flex-col gap-1 p-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="font-semibold text-stone-900">{details.title}</h2>
-                <p className="text-sm text-stone-500">
+                <h2 className="font-semibold text-slate-900">{details.title}</h2>
+                <p className="text-sm text-slate-500">
                   {questions.length} questions - {details.duration} min. Click an option to change the correct answer.
                 </p>
               </div>
@@ -159,8 +159,8 @@ const TeacherUpload = () => {
             {questions.map((q, qIndex) => (
               <div key={qIndex} className="card p-5">
                 <div className="mb-3 flex items-start justify-between gap-3">
-                  <h3 className="font-medium text-stone-900">{qIndex + 1}. {q.question}</h3>
-                  <button onClick={() => removeQuestion(qIndex)} className="text-stone-400 hover:text-red-600" aria-label="Remove question">
+                  <h3 className="font-medium text-slate-900">{qIndex + 1}. {q.question}</h3>
+                  <button onClick={() => removeQuestion(qIndex)} className="text-slate-400 hover:text-red-600" aria-label="Remove question">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
@@ -169,8 +169,8 @@ const TeacherUpload = () => {
                     <button key={optionIndex} type="button" onClick={() => setCorrect(qIndex, optionIndex)}
                       className={`rounded-lg border p-2.5 text-left text-sm transition-colors ${
                         q.correct === optionIndex
-                          ? 'border-brand-400 bg-brand-50 font-medium text-brand-800'
-                          : 'border-stone-200 hover:bg-stone-50'
+                          ? 'border-emerald-400 bg-emerald-50 font-medium text-emerald-800'
+                          : 'border-slate-200 hover:bg-slate-50'
                       }`}>
                       {String.fromCharCode(65 + optionIndex)}. {option} {q.correct === optionIndex && '✓'}
                     </button>
