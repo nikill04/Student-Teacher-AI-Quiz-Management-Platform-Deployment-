@@ -98,7 +98,7 @@ const JoinBatch = () => {
             {myBatches.map((batch) => (
               <li key={batch._id} className="card flex items-center justify-between p-4">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-indigo-50 p-2"><Users className="h-5 w-5 text-indigo-600" /></div>
+                  <div className="rounded-lg bg-brand-50 p-2"><Users className="h-5 w-5 text-brand-600" /></div>
                   <span className="font-medium text-slate-900">{batch.name}</span>
                 </div>
                 <button onClick={() => handleLeave(batch)} className="btn-danger px-3 py-1.5">

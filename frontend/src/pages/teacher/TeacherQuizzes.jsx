@@ -61,7 +61,7 @@ const TeacherQuizzes = () => {
                     </td>
                     <td><span className={quiz.source === 'ai' ? 'badge-blue' : 'badge-gray'}>{quiz.source === 'ai' ? 'AI' : 'Manual'}</span></td>
                     <td className="text-right">
-                      <Link to={`/teacher/leaderboard?quizId=${quiz._id}`} className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">
+                      <Link to={`/teacher/leaderboard?quizId=${quiz._id}`} className="text-sm font-semibold text-brand-600 hover:text-brand-700">
                         Results
                       </Link>
                     </td>

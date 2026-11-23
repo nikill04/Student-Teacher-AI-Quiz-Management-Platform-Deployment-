@@ -20,7 +20,7 @@ const LandingPage = () => {
       <nav className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2">
-            <div className="rounded-lg bg-indigo-600 p-1.5">
+            <div className="rounded-lg bg-brand-600 p-1.5">
               <Brain className="h-5 w-5 text-white" />
             </div>
             <span className="text-lg font-bold text-slate-900">QuizAI</span>
@@ -39,11 +39,11 @@ const LandingPage = () => {
       </nav>
 
       {/* Hero */}
-      <section className="bg-gradient-to-b from-indigo-50 to-white">
+      <section className="bg-gradient-to-b from-brand-50 to-white">
         <div className="mx-auto max-w-4xl px-4 py-20 text-center sm:py-28">
           <span className="badge-blue mb-6">AI-powered quizzes for classrooms</span>
           <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl">
-            Create quizzes in seconds. <span className="text-indigo-600">Learn smarter.</span>
+            Create quizzes in seconds. <span className="text-brand-600">Learn smarter.</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-600">
             Teachers turn study material into quizzes with AI. Students take timed quizzes,
@@ -69,8 +69,8 @@ const LandingPage = () => {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature) => (
             <div key={feature.title} className="card p-6 transition-shadow hover:shadow-md">
-              <div className="mb-4 inline-flex rounded-xl bg-indigo-50 p-3">
-                <feature.icon className="h-6 w-6 text-indigo-600" />
+              <div className="mb-4 inline-flex rounded-xl bg-brand-50 p-3">
+                <feature.icon className="h-6 w-6 text-brand-600" />
               </div>
               <h3 className="text-lg font-semibold text-slate-900">{feature.title}</h3>
               <p className="mt-2 text-sm text-slate-600">{feature.text}</p>
@@ -105,7 +105,7 @@ const LandingPage = () => {
       <footer className="border-t border-slate-200">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-8 text-sm text-slate-500 sm:flex-row sm:px-6">
           <div className="flex items-center gap-2">
-            <Brain className="h-4 w-4 text-indigo-600" />
+            <Brain className="h-4 w-4 text-brand-600" />
             <span className="font-semibold text-slate-700">QuizAI</span>
           </div>
           <p>&copy; {new Date().getFullYear()} QuizAI. Built for smarter assessments.</p>

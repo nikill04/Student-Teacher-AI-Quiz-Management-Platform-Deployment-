@@ -25,7 +25,7 @@ const AppLayout = ({ role, navigation, children }) => {
     <div className="flex h-full flex-col">
       {/* Logo */}
       <div className="flex items-center gap-2 px-6 py-5">
-        <div className="rounded-lg bg-indigo-600 p-1.5">
+        <div className="rounded-lg bg-brand-600 p-1.5">
           <Brain className="h-5 w-5 text-white" />
         </div>
         <span className="text-lg font-bold text-slate-900">QuizAI</span>
@@ -41,7 +41,7 @@ const AppLayout = ({ role, navigation, children }) => {
             onClick={() => setMenuOpen(false)}
             className={({ isActive }) =>
               `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                isActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                isActive ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`
             }
           >
@@ -54,7 +54,7 @@ const AppLayout = ({ role, navigation, children }) => {
       {/* User + logout */}
       <div className="border-t border-slate-200 p-4">
         <div className="mb-3 flex items-center gap-3 px-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 font-semibold text-indigo-700">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 font-semibold text-brand-700">
             {user.name?.[0]?.toUpperCase() || '?'}
           </div>
           <p className="truncate text-sm font-medium text-slate-900">{user.name}</p>
@@ -77,7 +77,7 @@ const AppLayout = ({ role, navigation, children }) => {
       {/* Mobile top bar */}
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
         <div className="flex items-center gap-2">
-          <Brain className="h-6 w-6 text-indigo-600" />
+          <Brain className="h-6 w-6 text-brand-600" />
           <span className="font-bold text-slate-900">QuizAI</span>
         </div>
         <button onClick={() => setMenuOpen(true)} className="rounded-lg p-2 hover:bg-slate-100" aria-label="Open menu">

@@ -59,7 +59,7 @@ const Register = () => {
       footer={
         <>
           Already have an account?{' '}
-          <Link to="/login" className="font-semibold text-indigo-600 hover:text-indigo-500">Sign in here</Link>
+          <Link to="/login" className="font-semibold text-brand-600 hover:text-brand-500">Sign in here</Link>
         </>
       }
     >
@@ -77,7 +77,7 @@ const Register = () => {
                 onClick={() => setFormData({ ...formData, role: role.value })}
                 className={`flex items-center justify-center gap-2 rounded-lg border-2 p-3 text-sm font-semibold transition-colors ${
                   formData.role === role.value
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                    ? 'border-brand-600 bg-brand-50 text-brand-700'
                     : 'border-slate-200 text-slate-600 hover:border-slate-300'
                 }`}
               >

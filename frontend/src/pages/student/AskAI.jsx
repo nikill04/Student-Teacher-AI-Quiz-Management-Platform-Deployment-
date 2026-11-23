@@ -70,11 +70,11 @@ const StudentAskAI = () => {
             const isUser = message.type === 'user';
             return (
               <div key={message.id} className={`flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
-                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isUser ? 'bg-slate-700' : 'bg-indigo-600'}`}>
+                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isUser ? 'bg-slate-700' : 'bg-brand-600'}`}>
                   {isUser ? <User className="h-4 w-4 text-white" /> : <Bot className="h-4 w-4 text-white" />}
                 </div>
                 <div className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed sm:max-w-2xl ${
-                  isUser ? 'bg-indigo-600 text-white'
+                  isUser ? 'bg-brand-600 text-white'
                     : message.type === 'error' ? 'border border-red-200 bg-red-50 text-red-700'
                     : 'border border-slate-200 bg-white text-slate-800'
                 }`}>
@@ -86,7 +86,7 @@ const StudentAskAI = () => {
 
           {isLoading && (
             <div className="flex gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-600">
                 <Bot className="h-4 w-4 text-white" />
               </div>
               <div className="flex gap-1.5 rounded-2xl border border-slate-200 bg-white px-4 py-4">

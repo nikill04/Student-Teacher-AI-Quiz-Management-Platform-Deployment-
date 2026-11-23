@@ -22,7 +22,7 @@ export const PageHeader = ({ title, subtitle, children }) => (
 // Spinning loader
 export const Loading = ({ text = 'Loading...' }) => (
   <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-    <div className="mb-3 h-10 w-10 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600" />
+    <div className="mb-3 h-10 w-10 animate-spin rounded-full border-4 border-brand-200 border-t-brand-600" />
     <p className="text-sm">{text}</p>
   </div>
 );
@@ -60,12 +60,12 @@ export const EmptyState = ({ icon: Icon, title, text, children }) => (
 
 // Number card used on dashboards
 const statColors = {
-  indigo: 'bg-indigo-50 text-indigo-600',
+  brand: 'bg-brand-50 text-brand-600',
   emerald: 'bg-emerald-50 text-emerald-600',
   amber: 'bg-amber-50 text-amber-600',
   rose: 'bg-rose-50 text-rose-600',
 };
-export const StatCard = ({ icon: Icon, label, value, color = 'indigo' }) => (
+export const StatCard = ({ icon: Icon, label, value, color = 'brand' }) => (
   <div className="card flex items-center gap-4 p-5">
     <div className={`rounded-xl p-3 ${statColors[color]}`}>
       <Icon className="h-6 w-6" />

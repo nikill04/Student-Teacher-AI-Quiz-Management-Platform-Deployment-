@@ -112,12 +112,12 @@ const TeacherUpload = () => {
                 onDragLeave={handleDrag}
                 onDrop={handleDrop}
                 className={`flex cursor-pointer flex-col items-center rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
-                  dragActive ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'
+                  dragActive ? 'border-brand-500 bg-brand-50' : 'border-slate-300 hover:border-brand-400 hover:bg-slate-50'
                 }`}
               >
                 {file ? (
                   <>
-                    <FileText className="mb-2 h-10 w-10 text-indigo-600" />
+                    <FileText className="mb-2 h-10 w-10 text-brand-600" />
                     <p className="font-semibold text-slate-900">{file.name}</p>
                     <p className="text-sm text-slate-500">{(file.size / 1024 / 1024).toFixed(2)} MB - click to change</p>
                   </>

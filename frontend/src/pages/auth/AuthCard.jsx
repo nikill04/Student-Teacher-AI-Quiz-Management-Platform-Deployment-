@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom';
 import { Brain } from 'lucide-react';
 
 const AuthCard = ({ title, subtitle, children, footer }) => (
-  <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-indigo-50 to-white p-4">
+  <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-brand-50 to-white p-4">
     <div className="w-full max-w-md">
       <div className="card p-8">
         <div className="mb-8 text-center">
-          <Link to="/" className="mb-4 inline-flex rounded-2xl bg-indigo-600 p-3">
+          <Link to="/" className="mb-4 inline-flex rounded-2xl bg-brand-600 p-3">
             <Brain className="h-7 w-7 text-white" />
           </Link>
           <h1 className="text-2xl font-bold text-slate-900">{title}</h1>

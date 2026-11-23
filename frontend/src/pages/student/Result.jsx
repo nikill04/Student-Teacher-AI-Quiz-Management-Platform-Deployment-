@@ -8,7 +8,7 @@ import axios, { getErrorMessage } from '../../api/axios';
 // Colour of the score card depending on the score
 const scoreStyle = (score) => {
   if (score >= 80) return { box: 'border-emerald-200 bg-emerald-50', text: 'text-emerald-600', label: 'Excellent work!' };
-  if (score >= 50) return { box: 'border-indigo-200 bg-indigo-50', text: 'text-indigo-600', label: 'Good job!' };
+  if (score >= 50) return { box: 'border-brand-200 bg-brand-50', text: 'text-brand-600', label: 'Good job!' };
   return { box: 'border-red-200 bg-red-50', text: 'text-red-600', label: 'Keep practicing!' };
 };
 
@@ -109,7 +109,7 @@ const StudentResult = () => {
                     </div>
 
                     {q.explanation && (
-                      <p className="mt-3 rounded-lg bg-indigo-50 p-3 text-sm text-indigo-900">
+                      <p className="mt-3 rounded-lg bg-brand-50 p-3 text-sm text-brand-900">
                         <span className="font-semibold">Explanation: </span>{q.explanation}
                       </p>
                     )}

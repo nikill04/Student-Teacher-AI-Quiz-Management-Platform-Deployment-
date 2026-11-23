@@ -120,7 +120,7 @@ const StudentQuiz = () => {
         </div>
         {/* Progress bar */}
         <div className="h-1 bg-slate-100">
-          <div className="h-1 bg-indigo-600 transition-all" style={{ width: `${((current + 1) / total) * 100}%` }} />
+          <div className="h-1 bg-brand-600 transition-all" style={{ width: `${((current + 1) / total) * 100}%` }} />
         </div>
       </header>
 
@@ -129,7 +129,7 @@ const StudentQuiz = () => {
 
         {/* Question */}
         <div className="card p-6 sm:p-8">
-          <p className="mb-2 text-sm font-semibold text-indigo-600">Question {current + 1} of {total}</p>
+          <p className="mb-2 text-sm font-semibold text-brand-600">Question {current + 1} of {total}</p>
           <h2 className="mb-6 text-xl font-semibold text-slate-900">{question.question}</h2>
 
           <div className="space-y-3">
@@ -140,11 +140,11 @@ const StudentQuiz = () => {
                   key={index}
                   onClick={() => setAnswers({ ...answers, [current]: index })}
                   className={`flex w-full items-center gap-4 rounded-xl border-2 p-4 text-left transition-colors ${
-                    selected ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200 bg-white hover:border-slate-300'
+                    selected ? 'border-brand-600 bg-brand-50' : 'border-slate-200 bg-white hover:border-slate-300'
                   }`}
                 >
                   <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-                    selected ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'
+                    selected ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-600'
                   }`}>
                     {String.fromCharCode(65 + index)}
                   </span>
@@ -179,7 +179,7 @@ const StudentQuiz = () => {
               onClick={() => setCurrent(index)}
               className={`h-9 w-9 rounded-lg text-sm font-semibold transition-colors ${
                 index === current
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-brand-600 text-white'
                   : answers[index] !== undefined
                   ? 'bg-emerald-100 text-emerald-700'
                   : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-100'

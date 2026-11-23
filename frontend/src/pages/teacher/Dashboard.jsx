@@ -46,9 +46,9 @@ const Dashboard = () => {
             <div className="mb-8 grid gap-4 md:grid-cols-3">
               {quickActions.map((action) => (
                 <Link key={action.to} to={action.to}
-                  className="card group p-5 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md">
-                  <action.icon className="mb-3 h-7 w-7 text-indigo-600" />
-                  <h3 className="font-semibold text-slate-900 group-hover:text-indigo-700">{action.title}</h3>
+                  className="card group p-5 transition hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-md">
+                  <action.icon className="mb-3 h-7 w-7 text-brand-600" />
+                  <h3 className="font-semibold text-slate-900 group-hover:text-brand-700">{action.title}</h3>
                   <p className="mt-1 text-sm text-slate-500">{action.text}</p>
                 </Link>
               ))}
@@ -58,11 +58,11 @@ const Dashboard = () => {
             <div className="card overflow-hidden">
               <div className="flex items-center justify-between p-5">
                 <h2 className="text-lg font-semibold text-slate-900">Recent Quizzes</h2>
-                <Link to="/teacher/quizzes" className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">View all</Link>
+                <Link to="/teacher/quizzes" className="text-sm font-semibold text-brand-600 hover:text-brand-700">View all</Link>
               </div>
               {data.quizzes.length === 0 ? (
                 <p className="border-t border-slate-100 p-8 text-center text-slate-500">
-                  No quizzes yet. Start by <Link to="/teacher/batches/create" className="font-semibold text-indigo-600">creating a batch</Link>.
+                  No quizzes yet. Start by <Link to="/teacher/batches/create" className="font-semibold text-brand-600">creating a batch</Link>.
                 </p>
               ) : (
                 <div className="overflow-x-auto">
@@ -89,7 +89,7 @@ const Dashboard = () => {
                           </td>
                           <td className="text-right">
                             <Link to={`/teacher/leaderboard?quizId=${quiz._id}`}
-                              className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">
+                              className="text-sm font-semibold text-brand-600 hover:text-brand-700">
                               View results
                             </Link>
                           </td>

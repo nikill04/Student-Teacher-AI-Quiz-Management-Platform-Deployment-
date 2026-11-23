@@ -43,7 +43,7 @@ const Login = () => {
       footer={
         <>
           Don't have an account?{' '}
-          <Link to="/register" className="font-semibold text-indigo-600 hover:text-indigo-500">Register here</Link>
+          <Link to="/register" className="font-semibold text-brand-600 hover:text-brand-500">Register here</Link>
         </>
       }
     >
