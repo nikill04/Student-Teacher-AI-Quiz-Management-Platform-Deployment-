@@ -98,17 +98,17 @@ const StudentQuiz = () => {
   const isLast = current === total - 1;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen">
       {/* Top bar: title, timer, submit */}
-      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white">
+      <header className="sticky top-0 z-20 border-b border-stone-200 bg-white">
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-3">
           <div className="min-w-0">
-            <h1 className="truncate font-bold text-slate-900">{quiz.title}</h1>
-            <p className="text-xs text-slate-500">{answeredCount} of {total} answered</p>
+            <h1 className="truncate font-bold text-stone-900">{quiz.title}</h1>
+            <p className="text-xs text-stone-500">{answeredCount} of {total} answered</p>
           </div>
           <div className="flex items-center gap-3">
             <div className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-mono font-semibold ${
-              secondsLeft < 60 ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-700'
+              secondsLeft < 60 ? 'bg-red-50 text-red-600' : 'bg-stone-100 text-stone-700'
             }`}>
               <Clock className="h-4 w-4" />
               {formatTime(secondsLeft ?? 0)}
@@ -119,8 +119,8 @@ const StudentQuiz = () => {
           </div>
         </div>
         {/* Progress bar */}
-        <div className="h-1 bg-slate-100">
-          <div className="h-1 bg-indigo-600 transition-all" style={{ width: `${((current + 1) / total) * 100}%` }} />
+        <div className="h-1 bg-stone-100">
+          <div className="h-1 bg-brand-600 transition-all" style={{ width: `${((current + 1) / total) * 100}%` }} />
         </div>
       </header>
 
@@ -129,8 +129,8 @@ const StudentQuiz = () => {
 
         {/* Question */}
         <div className="card p-6 sm:p-8">
-          <p className="mb-2 text-sm font-semibold text-indigo-600">Question {current + 1} of {total}</p>
-          <h2 className="mb-6 text-xl font-semibold text-slate-900">{question.question}</h2>
+          <p className="mb-2 font-mono text-xs text-stone-500">Question {current + 1} of {total}</p>
+          <h2 className="mb-6 text-2xl font-medium leading-snug text-stone-900">{question.question}</h2>
 
           <div className="space-y-3">
             {question.options.map((option, index) => {
@@ -139,16 +139,16 @@ const StudentQuiz = () => {
                 <button
                   key={index}
                   onClick={() => setAnswers({ ...answers, [current]: index })}
-                  className={`flex w-full items-center gap-4 rounded-xl border-2 p-4 text-left transition-colors ${
-                    selected ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200 bg-white hover:border-slate-300'
+                  className={`flex w-full items-center gap-4 rounded-md border p-4 text-left transition-colors ${
+                    selected ? 'border-brand-600 bg-brand-50 ring-1 ring-brand-600' : 'border-stone-300 bg-white hover:border-stone-400'
                   }`}
                 >
-                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-                    selected ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'
+                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm font-medium ${
+                    selected ? 'border-brand-600 bg-brand-600 text-white' : 'border-stone-300 text-stone-600'
                   }`}>
                     {String.fromCharCode(65 + index)}
                   </span>
-                  <span className="text-slate-800">{option}</span>
+                  <span className="text-stone-800">{option}</span>
                 </button>
               );
             })}
@@ -177,12 +177,12 @@ const StudentQuiz = () => {
             <button
               key={index}
               onClick={() => setCurrent(index)}
-              className={`h-9 w-9 rounded-lg text-sm font-semibold transition-colors ${
+              className={`h-9 w-9 rounded-md font-mono text-sm transition-colors ${
                 index === current
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-stone-900 text-white'
                   : answers[index] !== undefined
-                  ? 'bg-emerald-100 text-emerald-700'
-                  : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-100'
+                  ? 'bg-brand-100 text-brand-800'
+                  : 'border border-stone-300 bg-white text-stone-600 hover:bg-stone-100'
               }`}
             >
               {index + 1}
@@ -193,10 +193,10 @@ const StudentQuiz = () => {
 
       {/* Submit confirmation */}
       {showConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/50 p-4">
           <div className="card w-full max-w-md p-6">
-            <h3 className="mb-2 text-lg font-semibold text-slate-900">Submit quiz?</h3>
-            <p className="mb-6 text-slate-600">
+            <h3 className="mb-2 text-lg font-semibold text-stone-900">Submit quiz?</h3>
+            <p className="mb-6 text-stone-600">
               You answered {answeredCount} of {total} questions.
               {answeredCount < total && ' Unanswered questions count as wrong.'}
             </p>

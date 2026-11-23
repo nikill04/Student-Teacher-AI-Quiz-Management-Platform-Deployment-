@@ -42,7 +42,7 @@ const QuizDetailsFields = ({ details, onChange, batches }) => {
       </div>
 
       <div>
-        <label className="label" htmlFor="deadline">Deadline <span className="font-normal text-slate-400">(optional)</span></label>
+        <label className="label" htmlFor="deadline">Deadline <span className="font-normal text-stone-400">(optional)</span></label>
         <input id="deadline" type="datetime-local" className="input" min={nowForInput()}
           value={details.deadline} onChange={(e) => update('deadline', e.target.value)} />
       </div>

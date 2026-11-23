@@ -38,8 +38,8 @@ const StudentMyResults = () => {
             {results.map((result) => (
               <div key={result.quizId} className="card flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="font-semibold text-slate-900">{result.quizTitle}</h2>
-                  <p className="text-sm text-slate-500">
+                  <h2 className="font-semibold text-stone-900">{result.quizTitle}</h2>
+                  <p className="text-sm text-stone-500">
                     {result.correctAnswers} / {result.totalQuestions} correct - {formatDate(result.completedAt, '')} - {result.timeSpent}
                   </p>
                 </div>

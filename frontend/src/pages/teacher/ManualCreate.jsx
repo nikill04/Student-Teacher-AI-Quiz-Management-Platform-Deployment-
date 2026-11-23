@@ -66,14 +66,14 @@ const ManualCreate = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="card p-6">
-            <h2 className="mb-4 font-semibold text-slate-900">Quiz details</h2>
+            <h2 className="mb-4 font-semibold text-stone-900">Quiz details</h2>
             <QuizDetailsFields details={details} onChange={setDetails} batches={batches} />
           </div>
 
           {questions.map((q, index) => (
             <div key={q.id} className="card p-6">
               <div className="mb-3 flex items-center justify-between">
-                <h3 className="font-semibold text-slate-900">Question {index + 1}</h3>
+                <h3 className="font-semibold text-stone-900">Question {index + 1}</h3>
                 {questions.length > 1 && (
                   <button type="button" onClick={() => setQuestions(questions.filter((x) => x.id !== q.id))}
                     className="btn-danger px-3 py-1.5" aria-label="Delete question">
@@ -89,9 +89,9 @@ const ManualCreate = () => {
                 {q.options.map((option, optionIndex) => (
                   <label key={optionIndex}
                     className={`flex items-center gap-3 rounded-lg border p-2 ${
-                      q.correct === optionIndex ? 'border-emerald-400 bg-emerald-50' : 'border-slate-200'
+                      q.correct === optionIndex ? 'border-brand-400 bg-brand-50' : 'border-stone-200'
                     }`}>
-                    <input type="radio" name={`correct-${q.id}`} className="h-4 w-4 accent-emerald-600"
+                    <input type="radio" name={`correct-${q.id}`} className="h-4 w-4 accent-brand-600"
                       checked={q.correct === optionIndex} onChange={() => updateQuestion(q.id, 'correct', optionIndex)} />
                     <input className="input border-0 bg-transparent px-1 py-1 focus:ring-0"
                       placeholder={`Option ${String.fromCharCode(65 + optionIndex)}`}
