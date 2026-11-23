@@ -101,6 +101,13 @@ Check it: open `https://student-teacher-ai-quiz-management.onrender.com/api/heal
 
 **MongoDB Atlas:** *Network Access* must allow `0.0.0.0/0` (Render has no fixed IP).
 
+**Redis (Upstash):** database `student-teacher-ai-quiz-cache` (Singapore). Its `rediss://...` URL is the `REDIS_URL` on Render.
+
+**Keep-alive (Upstash QStash):** free services delete or pause themselves when unused
+(Upstash Redis after 14 days, MongoDB Atlas after ~60 days). A QStash schedule named
+`quiz-app-keepalive` calls `/api/health` every 3 days, which wakes Render and sends a real
+command to Redis and MongoDB. See/edit it at https://console.upstash.com -> QStash -> Schedules.
+
 ---
 
 ## 4. How the app works
