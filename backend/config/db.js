@@ -24,4 +24,16 @@ const connectDB = async () => {
 // true when MongoDB is connected and ready
 export const isDBConnected = () => mongoose.connection.readyState === 1;
 
+// Used by /api/health: sends a real command to MongoDB
+// (this also counts as activity, so MongoDB Atlas does not pause an idle free cluster)
+export async function databaseStatus() {
+  if (!isDBConnected()) return 'not connected';
+  try {
+    await mongoose.connection.db.admin().ping();
+    return 'connected';
+  } catch {
+    return 'not connected';
+  }
+}
+
 export default connectDB;

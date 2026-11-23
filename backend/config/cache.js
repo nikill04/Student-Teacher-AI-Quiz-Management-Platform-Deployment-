@@ -77,6 +77,19 @@ function withTimeout(promise) {
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
+// Used by /api/health: 'connected', 'not connected' or 'not configured'.
+// (The PING also counts as activity, so Upstash does not delete an idle free database.)
+export async function cacheStatus() {
+  if (!client) return 'not configured';
+  if (!isReady()) return 'not connected';
+  try {
+    await withTimeout(client.ping());
+    return 'connected';
+  } catch {
+    return 'not connected';
+  }
+}
+
 export async function getCache(key) {
   if (!isReady()) return null;
   try {

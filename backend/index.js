@@ -5,7 +5,8 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
-import connectDB, { isDBConnected } from './config/db.js';
+import connectDB, { isDBConnected, databaseStatus } from './config/db.js';
+import { cacheStatus } from './config/cache.js';
 import authRoutes from './routes/authRoutes.js';
 import studentRouter from './routes/studentRoutes.js';
 import teacherRouter from './routes/teacherRoutes.js';
@@ -53,9 +54,12 @@ app.get('/api-docs.json', (req, res) => res.json(swaggerSpec));
 
 // -------------------- ROUTES --------------------
 app.get('/', (req, res) => res.send('QuizAI API is running. Docs: /api-docs'));
-app.get('/api/health', (req, res) =>
-  res.json({ status: 'ok', database: isDBConnected() ? 'connected' : 'not connected' })
-);
+// Health check: shows if MongoDB and Redis are reachable.
+// It is also called every few days by an Upstash QStash schedule ("keep-alive"),
+// so the free Render server, Upstash Redis and MongoDB Atlas stay active.
+app.get('/api/health', async (req, res) => {
+  res.json({ status: 'ok', database: await databaseStatus(), cache: await cacheStatus() });
+});
 
 // If MongoDB is not connected yet, answer with a clear message instead of waiting
 app.use('/api', (req, res, next) => {
