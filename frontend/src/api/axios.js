@@ -11,7 +11,7 @@
 import axios from 'axios';
 
 // Backend address:
-// 1. VITE_API_URL if it is set (frontend/.env or Render "Environment")
+// 1. VITE_API_URL if it is set (frontend/.env or Vercel "Environment Variables")
 // 2. otherwise: the deployed backend for production builds, localhost for "npm run dev"
 const API_URL =
   import.meta.env.VITE_API_URL ||

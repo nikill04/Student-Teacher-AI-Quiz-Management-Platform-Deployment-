@@ -41,7 +41,8 @@ app.use(
     origin: [
       'http://localhost:5173', // Vite dev server
       'http://localhost:3001', // docker-compose frontend
-      'https://student-teacher-ai-quiz-management-qvdm.onrender.com', // deployed frontend
+      'https://student-teacher-ai-quiz-management.vercel.app', // deployed frontend (Vercel)
+      'https://student-teacher-ai-quiz-management-qvdm.onrender.com', // old frontend on Render (kept for now)
       process.env.FRONTEND_URL, // any other frontend URL (optional, set in .env / Render)
     ].filter(Boolean),
     credentials: true,
